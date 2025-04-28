@@ -1,0 +1,2 @@
+[console_scripts]
+nfcore-validator = nfcore_validator.cli.main:main
