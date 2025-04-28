@@ -22,8 +22,8 @@ An AI-powered agent for validating nf-core pipeline compliance. This tool analyz
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nfcore-validator.git
-cd nfcore-validator
+git clone https://github.com/arunbodd/nf-core_guidelines_validator
+cd nf-core_guidelines_validator
 
 # Install the package
 pip install -e .
