@@ -1,46 +1,100 @@
 """
-Chat interface for querying nf-core documentation
+Chat interface for nf-core documentation
 """
 import os
-from typing import List, Dict, Any, Optional
+from typing import Dict, List, Any, Optional
+import json
 
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage, HumanMessage
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 
+# Add imports for Claude and Windsurf models
+from langchain.chat_models import ChatAnthropic
+from langchain.embeddings import HuggingFaceEmbeddings
+import anthropic  # Direct import of the anthropic library
+
 class NfCoreDocChat:
-    """Chat interface for querying nf-core documentation"""
+    """Chat interface for nf-core documentation"""
     
-    def __init__(self, vectorstore_path: str = "nfcore_vectorstore", openai_api_key: str = None):
+    def __init__(self, vectorstore_path: str = "nfcore_vectorstore", openai_api_key: str = None,
+                 model_provider: str = "openai", anthropic_api_key: str = None):
         """Initialize the chat interface
         
         Args:
             vectorstore_path: Path to the vector store with nf-core documentation
             openai_api_key: OpenAI API key for LLM and embeddings
+            model_provider: Which model provider to use ('openai', 'anthropic', or 'windsurf')
+            anthropic_api_key: Anthropic API key for Claude models
         """
-        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+        self.model_provider = model_provider.lower()
         
-        if not self.openai_api_key:
-            raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable or pass it directly.")
+        # Set up the appropriate model based on provider
+        if self.model_provider == "openai":
+            self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
             
-        self.llm = ChatOpenAI(
-            temperature=0, 
-            model="gpt-4",
-            openai_api_key=self.openai_api_key
-        )
+            if not self.openai_api_key:
+                raise ValueError("OpenAI API key is required for OpenAI models. Set OPENAI_API_KEY environment variable or pass it directly.")
+                
+            self.llm = ChatOpenAI(
+                temperature=0, 
+                model="gpt-4",
+                openai_api_key=self.openai_api_key
+            )
+            
+            self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+            
+        elif self.model_provider == "anthropic":
+            self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
+            
+            if not self.anthropic_api_key:
+                raise ValueError("Anthropic API key is required for Claude models. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
+            
+            # Create a direct Anthropic client
+            print("Using direct Anthropic API integration")
+            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+            self.anthropic_model = "claude-3-7-sonnet-20250219"
+            
+            # We'll use a custom method for calling the Anthropic API
+            # The llm attribute will be a placeholder
+            self.llm = None
+            
+            # For embeddings, we'll use a local model or fall back to OpenAI if available
+            if openai_api_key or os.environ.get("OPENAI_API_KEY"):
+                self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+                self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+            else:
+                # Use a local embedding model as fallback
+                self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+                
+        elif self.model_provider == "windsurf":
+            # Windsurf model implementation
+            # This would need to be implemented based on Windsurf's API
+            raise NotImplementedError("Windsurf model integration is not yet implemented")
+            
+        else:
+            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai', 'anthropic', or 'windsurf'")
         
-        self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+        # Load the vector store
         self.vectorstore = FAISS.load_local(vectorstore_path, self.embeddings)
         
-        self.system_prompt = """You are an expert on nf-core pipeline guidelines and best practices. 
-Your task is to answer questions about nf-core documentation, guidelines, and requirements.
-Always base your answers on the official nf-core documentation. 
-If you're not sure about something, say so rather than making up information.
-Include specific references to the documentation when possible."""
-        
+        # Initialize chat history
         self.chat_history = []
-    
+        
+        # System prompt
+        self.system_prompt = """You are an nf-core documentation assistant. You help users understand nf-core guidelines, best practices, and requirements for Nextflow pipelines.
+
+Answer questions based ONLY on the provided documentation. If you don't know the answer or if it's not covered in the documentation, say so.
+
+For each answer:
+1. Be concise and accurate
+2. Cite specific guidelines when relevant (e.g., "According to module guideline 2.1...")
+3. Provide practical examples when helpful
+4. Organize information clearly with markdown formatting
+
+Remember that you're helping users create compliant nf-core pipelines."""
+        
     def ask(self, question: str, k: int = 5) -> Dict[str, Any]:
         """Ask a question about nf-core documentation
         
@@ -88,7 +142,11 @@ Include specific references to the documentation when possible."""
         messages.append(HumanMessage(content=query_with_context))
         
         # Get response
-        response = self.llm(messages)
+        if self.model_provider == "anthropic":
+            # Use the custom method for calling the Anthropic API
+            response = self._call_anthropic_api(messages)
+        else:
+            response = self.llm(messages)
         
         # Update chat history
         self.chat_history.append(HumanMessage(content=question))
@@ -111,6 +169,25 @@ Include specific references to the documentation when possible."""
             "sources": sources,
             "categories": self._get_unique_categories(sources)
         }
+        
+    def _call_anthropic_api(self, messages):
+        # Convert messages to a format suitable for the Anthropic API
+        api_messages = []
+        for msg in messages:
+            if isinstance(msg, SystemMessage):
+                api_messages.append({"role": "system", "content": msg.content})
+            elif isinstance(msg, HumanMessage):
+                api_messages.append({"role": "user", "content": msg.content})
+        
+        # Call the Anthropic API
+        response = self.anthropic_client.complete(
+            messages=api_messages,
+            model=self.anthropic_model,
+            temperature=0
+        )
+        
+        # Convert the response to a HumanMessage
+        return HumanMessage(content=response.generated_text)
         
     def _categorize_sources(self, docs):
         """Categorize sources by documentation section
