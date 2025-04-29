@@ -1,0 +1,3976 @@
+{
+  "pipeline_path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope",
+  "components": [
+    {
+      "component_type": "other_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/functions.nf",
+      "requirements": [
+        {
+          "id": "file_location",
+          "description": "Utility functions should be in the lib directory",
+          "status": "failed",
+          "fix": "Move this file to the lib directory of your pipeline, e.g., lib/NfcoreTemplate.groovy or lib/Utils.groovy"
+        },
+        {
+          "id": "function_naming",
+          "description": "All function names must follow camelCase convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "code_organization",
+          "description": "Utility functions should be organized in a class structure",
+          "status": "failed",
+          "fix": "Refactor the functions into a proper Groovy class, e.g., 'class Utils { static def getSoftwareName(task_process) {...} }'"
+        },
+        {
+          "id": "documentation",
+          "description": "Functions should have proper documentation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "modern_nextflow_practices",
+          "description": "Use modern Nextflow practices for utility functions",
+          "status": "failed",
+          "fix": "These functions are from older nf-core templates. Consider using the latest nf-core template which uses task.ext directly instead of these utility functions."
+        },
+        {
+          "id": "redundant_code",
+          "description": "Avoid redundant utility functions that are now handled by Nextflow core",
+          "status": "failed",
+          "fix": "Functions like initOptions and saveFiles are no longer needed in modern nf-core pipelines as they've been replaced by task.ext functionality."
+        }
+      ],
+      "summary": {
+        "passed": 2,
+        "failed": 4,
+        "compliance_score": 33
+      }
+    },
+    {
+      "component_type": "other_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/input_check_bam.nf",
+      "requirements": [
+        {
+          "id": "naming_convention",
+          "description": "Subworkflow name should follow the nf-core naming convention (all uppercase with underscores)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "file_location",
+          "description": "Local subworkflows should be placed in the subworkflows/local/ directory, not in modules/local/",
+          "status": "failed",
+          "fix": "Move this file to subworkflows/local/input_check_bam.nf"
+        },
+        {
+          "id": "input_channels",
+          "description": "Input channel declarations must be defined for all possible input files within the take block",
+          "status": "failed",
+          "fix": "Add a take block to define input channels, e.g., 'take: input_csv'"
+        },
+        {
+          "id": "output_channels",
+          "description": "Output channels should be named based on the major output file type",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "documentation",
+          "description": "Subworkflow should have documentation comments explaining its purpose and usage",
+          "status": "failed",
+          "fix": "Add a comment block at the top of the file explaining the purpose of the subworkflow, its inputs, outputs, and any other relevant information"
+        },
+        {
+          "id": "error_handling",
+          "description": "Error messages should be informative and help users troubleshoot issues",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "meta_map",
+          "description": "Meta map usage for sample information",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "file_existence_check",
+          "description": "Files should be checked for existence",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "helper_functions",
+          "description": "Helper functions should be properly defined and documented",
+          "status": "failed",
+          "fix": "Add documentation comments to the hasExtension function explaining its purpose and parameters"
+        },
+        {
+          "id": "direct_params_usage",
+          "description": "Avoid direct use of params in subworkflows, prefer passing values as inputs",
+          "status": "failed",
+          "fix": "Instead of using params.input directly, pass it as an input parameter to the subworkflow"
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 5,
+        "compliance_score": 50
+      }
+    },
+    {
+      "component_type": "other_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/reheader_bam.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_conda_directive",
+          "description": "Conda directive should pin to channel and version but not build",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_container_directive",
+          "description": "Container directive should use the correct format for Singularity and Docker",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_input_output_documentation",
+          "description": "Input and output channels should have comments describing their structure",
+          "status": "failed",
+          "fix": "Add comments describing the channel structure for each input and output, e.g., '// channel: [ val(meta), path(bam) ]'"
+        },
+        {
+          "id": "module_versions_output",
+          "description": "Module should output software versions in the correct format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_script_file",
+          "description": "External script files should be included in the module directory",
+          "status": "failed",
+          "fix": "The module uses 'reheaderbam.sh' but this script is not included in the module. Create a 'bin/reheaderbam.sh' file in the module directory."
+        },
+        {
+          "id": "module_meta_yml",
+          "description": "Module should have a meta.yml file with proper documentation",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the module directory with name, description, keywords, input/output descriptions, authors, and other required metadata."
+        },
+        {
+          "id": "module_test_data",
+          "description": "Module should have test data references using modules_testdata_base_path",
+          "status": "failed",
+          "fix": "Create a test directory with main.nf.test file that references test data using params.modules_testdata_base_path"
+        },
+        {
+          "id": "module_test_config",
+          "description": "Module should have a test configuration file",
+          "status": "failed",
+          "fix": "Create a nextflow.config file in the test directory with appropriate test configurations"
+        },
+        {
+          "id": "module_tag_usage",
+          "description": "Module should use the tag directive correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_ext_args",
+          "description": "Module should use ext.args for customizable parameters",
+          "status": "failed",
+          "fix": "Add ext.args to the script section to allow for customizable parameters, e.g., 'bash reheaderbam.sh $bam $gff ${task.ext.args ?: ''}'"
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 6,
+        "compliance_score": 45
+      }
+    },
+    {
+      "component_type": "other_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/kraken2_db_preparation.nf",
+      "requirements": [
+        {
+          "id": "module_structure",
+          "description": "Module has correct basic structure with process definition, inputs, outputs, and script section",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_naming",
+          "description": "Module name follows nf-core conventions (uppercase process name)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive follows nf-core format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda directive follows nf-core format with pinned channel and version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "args_usage",
+          "description": "Module should use task.ext.args for command-line arguments",
+          "status": "failed",
+          "fix": "Add 'def args = task.ext.args ?: ''' to the script section and use it in the command"
+        },
+        {
+          "id": "prefix_usage",
+          "description": "Module should use task.ext.prefix for output file naming",
+          "status": "failed",
+          "fix": "Add 'def prefix = task.ext.prefix ?: db.simpleName' to the script section and use it for consistent file naming"
+        },
+        {
+          "id": "meta_map",
+          "description": "Input should include meta map for sample metadata",
+          "status": "failed",
+          "fix": "Change input to include meta map: 'tuple val(meta), path(db)'"
+        },
+        {
+          "id": "versions_yml",
+          "description": "Versions.yml file is correctly generated",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "version_command",
+          "description": "Version command should extract version information directly from tool",
+          "status": "failed",
+          "fix": "Since tar is a standard tool, use proper version extraction: 'tar: \\$(tar --version 2>&1 | sed -n 1p | sed 's/tar (GNU tar) //')'"
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an accompanying environment.yml file",
+          "status": "failed",
+          "fix": "Create an environment.yml file in the same directory with conda dependencies: 'name: kraken2_db_preparation\nchannels:\n  - conda-forge\n  - defaults\ndependencies:\n  - conda-forge::sed=4.7'"
+        },
+        {
+          "id": "module_documentation",
+          "description": "Module should have documentation comments",
+          "status": "failed",
+          "fix": "Add documentation comments at the top of the file explaining the purpose, inputs, outputs, and any special considerations for this module"
+        }
+      ],
+      "summary": {
+        "passed": 4,
+        "failed": 7,
+        "compliance_score": 36
+      }
+    },
+    {
+      "component_type": "other_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/get_software_versions.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core conventions",
+          "status": "failed",
+          "fix": "This is a legacy module. nf-core now recommends using the versions.yml approach in each module instead of a centralized GET_SOFTWARE_VERSIONS process."
+        },
+        {
+          "id": "versions_yml",
+          "description": "Module should output a versions.yml file",
+          "status": "failed",
+          "fix": "Replace the current versioning approach with the standard versions.yml HEREDOC format. Each module should output its own version information."
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive should follow nf-core format",
+          "status": "failed",
+          "fix": "Update container directive to use the recommended format: container \"${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'https://depot.galaxyproject.org/singularity/python:3.8.3' : 'quay.io/biocontainers/python:3.8.3' }\""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda directive should specify channel and version",
+          "status": "failed",
+          "fix": "Update conda directive to use the recommended format: conda \"conda-forge::python=3.8.3\""
+        },
+        {
+          "id": "process_params",
+          "description": "Process should use task.ext instead of params for process-specific options",
+          "status": "failed",
+          "fix": "Replace params.options with task.ext.args and other task.ext properties"
+        },
+        {
+          "id": "publish_dir",
+          "description": "publishDir should use task.ext.publishDir",
+          "status": "failed",
+          "fix": "Replace the publishDir directive with task.ext.publishDir configuration in the pipeline config"
+        },
+        {
+          "id": "input_output_format",
+          "description": "Input and output channels should include meta maps",
+          "status": "failed",
+          "fix": "Update input and output channels to include meta maps: input: tuple val(meta), path(versions); output: tuple val(meta), path(\"software_versions.tsv\"), emit: tsv"
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should use proper variable definitions and HEREDOC for versions",
+          "status": "failed",
+          "fix": "Update script section to use proper variable definitions (def prefix = task.ext.prefix ?: 'software') and include a HEREDOC for versions.yml"
+        },
+        {
+          "id": "module_documentation",
+          "description": "Module should have proper documentation comments",
+          "status": "failed",
+          "fix": "Add documentation comments describing the purpose of the module, inputs, outputs, and any other relevant information"
+        },
+        {
+          "id": "use_of_functions",
+          "description": "Module should use standard nf-core functions",
+          "status": "failed",
+          "fix": "Replace custom saveFiles function with standard nf-core module functions"
+        }
+      ],
+      "summary": {
+        "passed": 0,
+        "failed": 10,
+        "compliance_score": 0
+      }
+    },
+    {
+      "component_type": "other_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/samplesheet_check.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive should use the correct format for both Docker and Singularity",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda directive should specify the required software and version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_statement",
+          "description": "Process should include a when statement that can be overridden via task.ext.when",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_yml",
+          "description": "Process should output a versions.yml file with correct formatting",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "args_definition",
+          "description": "Process should use task.ext.args for command-line arguments",
+          "status": "failed",
+          "fix": "Add a def args = task.ext.args ?: '' line and use it in the script section with the check_samplesheet.py command"
+        },
+        {
+          "id": "prefix_definition",
+          "description": "Process should use task.ext.prefix for output file prefixes",
+          "status": "failed",
+          "fix": "Add a def prefix = task.ext.prefix ?: 'samplesheet.valid' line and use it in the script section"
+        },
+        {
+          "id": "meta_input",
+          "description": "Module should use meta map as first input channel",
+          "status": "failed",
+          "fix": "Add a meta map as the first input channel: input: tuple val(meta), path(samplesheet)"
+        },
+        {
+          "id": "meta_output",
+          "description": "Module should include meta map in output channels",
+          "status": "failed",
+          "fix": "Include meta map in output channels: output: tuple val(meta), path('*.csv'), emit: csv"
+        },
+        {
+          "id": "script_formatting",
+          "description": "Script section should be properly formatted with args and prefix variables",
+          "status": "failed",
+          "fix": "Reformat script section to use args and prefix variables"
+        },
+        {
+          "id": "success_output",
+          "description": "The success output channel is not standard in nf-core modules",
+          "status": "failed",
+          "fix": "Remove the 'val true, emit: success' output and the 'echo \"SUCCESS\" > success.txt' command"
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 6,
+        "compliance_score": 45
+      }
+    },
+    {
+      "error": "Failed to parse LLM response as JSON",
+      "raw_response": "\n```json\n{\n  \"component_type\": \"module\",\n  \"path\": \"/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/freyja/variants/main.nf\",\n  \"requirements\": [\n    {\n      \"id\": \"module_naming\",\n      \"description\": \"Module name should follow nf-core naming conventions\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"process_tag\",\n      \"description\": \"Process should have a tag directive with meta.id\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"process_label\",\n      \"description\": \"Process should have an appropriate resource label\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"conda_directive\",\n      \"description\": \"Conda directive should point to environment.yml in the moduleDir\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"container_directive\",\n      \"description\": \"Container directive should support both Docker and Singularity\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"environment_yml\",\n      \"description\": \"An environment.yml file should exist alongside the module\",\n      \"status\": \"failed\",\n      \"fix\": \"Create an environment.yml file in the same directory as main.nf with pinned freyja version: 'name: freyja_variants\\nchannels:\\n  - conda-forge\\n  - bioconda\\n  - defaults\\ndependencies:\\n  - bioconda::freyja=1.5.2'\"\n    },\n    {\n      \"id\": \"input_format\",\n      \"description\": \"Input channels should be properly defined with meta map\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"output_format\",\n      \"description\": \"Output channels should be properly defined with meta map\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"versions_output\",\n      \"description\": \"Module should output a versions.yml file\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"when_directive\",\n      \"description\": \"Process should have a when directive\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"script_section\",\n      \"description\": \"Script section should properly use args, prefix and handle inputs/outputs\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"stub_section\",\n      \"description\": \"Stub section should be provided for CI testing\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"meta_yml\",\n      \"description\": \"A meta.yml file should exist with proper documentation\",\n      \"status\": \"failed\",\n      \"fix\": \"Create a meta.yml file in the same directory as main.nf with information about the module, including name, description, keywords, input/output channel structures, and authors.\"\n    },\n    {\n      \"id\": \"module_tests\",\n      \"description\": \"Module should have test files (main.nf.test and main.nf.test.snap)\",\n      \"status\": \"failed\",\n      \"fix\": \"Create test files for the module: main.nf.test (with test parameters) and main.nf.test.snap (with expected output structure).\"\n    },\n    {\n      \"id\": \"nextflow_config\",\n      \"description\": \"Module should have a nextflow.config file for testing\",\n      \"status\": \"failed\",\n      \"fix\": \"Create a nextflow.config file with process-specific settings for testing.\"\n    }\n  ],\n  \"summary\": {\n    \"passed\": 11,\n    \"failed\": 4,\n    \"compliance_score\": 73\n  }\n}\n```",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/freyja/variants/main.nf",
+      "component_type": "module"
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/freyja/update/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow the tool/subtool format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_naming",
+          "description": "Process name should be in uppercase and match the tool/subtool format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "label_directive",
+          "description": "Process should have a label directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda directive should point to environment.yml file in the module directory",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive should include both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_format",
+          "description": "Input and output channels should be properly defined",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Module should output a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Module should include a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should properly define the tool execution",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Stub section should be included for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_args",
+          "description": "Module should use task.ext.args for optional arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "environment_yml",
+          "description": "An environment.yml file should exist alongside the module",
+          "status": "failed",
+          "fix": "Create an environment.yml file in the same directory as main.nf with the freyja package pinned to version 1.5.2, e.g.: 'name: freyja_update\nchannels:\n  - conda-forge\n  - bioconda\n  - defaults\ndependencies:\n  - bioconda::freyja=1.5.2'"
+        },
+        {
+          "id": "meta_map",
+          "description": "Input channels should use meta map where appropriate",
+          "status": "failed",
+          "fix": "Consider using a meta map for the input channel instead of just a value. Change 'val db_name' to 'tuple val(meta), val(db_name)' for better compatibility with nf-core standards."
+        },
+        {
+          "id": "module_documentation",
+          "description": "Module should have documentation comments",
+          "status": "failed",
+          "fix": "Add documentation comments at the top of the file describing what the module does, its inputs, outputs, and any other relevant information."
+        },
+        {
+          "id": "test_files",
+          "description": "Module should have test files (main.nf.test and nextflow.config)",
+          "status": "failed",
+          "fix": "Create test files for the module: main.nf.test and nextflow.config in a tests/ directory to ensure the module can be properly tested."
+        }
+      ],
+      "summary": {
+        "passed": 11,
+        "failed": 4,
+        "compliance_score": 73
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/freyja/demix/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow the tool/subtool format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_naming",
+          "description": "Process name should be in uppercase with underscores",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "tag_usage",
+          "description": "Process should use tag with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "label_usage",
+          "description": "Process should have appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda directive should point to environment.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive should support both Docker and Singularity",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input channels should be properly formatted",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output channels should be properly formatted and include versions.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_clause",
+          "description": "Process should include a when clause",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should handle args and prefix properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_yml",
+          "description": "Versions.yml should be generated correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Stub section should be included for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "meta_yml",
+          "description": "Module should have a meta.yml file describing inputs and outputs",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the same directory as main.nf that describes the module, its inputs, outputs, and authors. Include detailed descriptions of input/output channel structures."
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an environment.yml file with pinned software versions",
+          "status": "failed",
+          "fix": "Create an environment.yml file in the same directory as main.nf with the freyja package pinned to version 1.5.2 from the bioconda channel."
+        },
+        {
+          "id": "test_config",
+          "description": "Module should have test configurations",
+          "status": "failed",
+          "fix": "Create test configurations in tests/modules/local/freyja/demix/ directory with test.yml, main.nf.test, main.nf.test.stub, and nextflow.config files to enable proper testing."
+        }
+      ],
+      "summary": {
+        "passed": 12,
+        "failed": 3,
+        "compliance_score": 80
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/minimap2/align/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda environment should be defined in environment.yml file with pinned versions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive should use both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_format",
+          "description": "Input and output channels should be properly defined with meta map",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output software versions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive for conditional execution",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_args",
+          "description": "Process should use task.ext.args for customization",
+          "status": "failed",
+          "fix": "Add support for task.ext.args in the script section to allow customization of minimap2 parameters. For example, add '${task.ext.args ?: ''}' to the minimap2 command."
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process should use task.ext.prefix for output file naming",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "error_strategy",
+          "description": "Process should have appropriate error handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_formatting",
+          "description": "Script section should be properly formatted and readable",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_documentation",
+          "description": "Module should have documentation comments",
+          "status": "failed",
+          "fix": "Add module documentation at the top of the file explaining the purpose, inputs, outputs, and parameters of the module."
+        },
+        {
+          "id": "samtools_version",
+          "description": "When using samtools in the script, its version should be included in versions.yml",
+          "status": "failed",
+          "fix": "Add samtools version to the versions.yml output since samtools is used for sorting and converting to BAM format."
+        }
+      ],
+      "summary": {
+        "passed": 10,
+        "failed": 3,
+        "compliance_score": 77
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/samtools/ampliconclip/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow the nf-core naming convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_structure",
+          "description": "Module should have a single process with the same name as the module",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Module should have a conda directive pointing to an environment.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Module should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Module should have a process label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_format",
+          "description": "Input and output channels should follow nf-core conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Module should output a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Module should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "task_ext_args",
+          "description": "Module should use task.ext.args for command-line arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "task_ext_prefix",
+          "description": "Module should use task.ext.prefix for output file prefixes",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "error_handling",
+          "description": "Module should have appropriate error handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "meta_map",
+          "description": "Module should use meta-map for sample metadata",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an environment.yml file in the same directory",
+          "status": "failed",
+          "fix": "Create an environment.yml file in the same directory as main.nf with pinned dependencies: name: samtools_ampliconclip\nchannels:\n  - conda-forge\n  - bioconda\n  - defaults\ndependencies:\n  - bioconda::samtools=1.21"
+        },
+        {
+          "id": "threads_usage",
+          "description": "Module should use task.cpus for thread allocation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_files",
+          "description": "Module should have test files (main.nf.test and nextflow.config)",
+          "status": "failed",
+          "fix": "Create test files for the module: main.nf.test with appropriate test cases and nextflow.config for ext.args configuration"
+        },
+        {
+          "id": "optional_inputs",
+          "description": "Optional inputs should be properly marked",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "optional_outputs",
+          "description": "Optional outputs should be properly marked",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "documentation",
+          "description": "Module should have a README.md file with usage instructions",
+          "status": "failed",
+          "fix": "Create a README.md file documenting the module's purpose, inputs, outputs, and parameters"
+        }
+      ],
+      "summary": {
+        "passed": 15,
+        "failed": 3,
+        "compliance_score": 83
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/local/fastp/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module should be named according to nf-core conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_tag",
+          "description": "Process should have a tag with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have a resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have a conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_format",
+          "description": "Input and output channels should be properly defined",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Process should have a properly formatted script section",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_yml_format",
+          "description": "versions.yml should be properly formatted with correct tool name and version",
+          "status": "failed",
+          "fix": "The versions.yml output is missing the 'END_VERSIONS' tag at the end. Change 'END' to 'END_VERSIONS' in the cat command."
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an environment.yml file in the same directory",
+          "status": "failed",
+          "fix": "Create an environment.yml file in the same directory as main.nf with the fastp package pinned to version 0.23.4 (e.g., 'bioconda::fastp=0.23.4')."
+        },
+        {
+          "id": "test_files",
+          "description": "Module should have test files (main.nf.test and nextflow.config)",
+          "status": "failed",
+          "fix": "Create test files main.nf.test and nextflow.config in the module directory to test the functionality."
+        },
+        {
+          "id": "args_handling",
+          "description": "Process should handle task.ext.args properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process should handle task.ext.prefix properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "paired_end_support",
+          "description": "For sequencing tools, should handle both single and paired-end data",
+          "status": "failed",
+          "fix": "The script only handles single-end data. Add support for paired-end data by checking meta.single_end and adding appropriate --in2 and --out2 parameters when needed."
+        }
+      ],
+      "summary": {
+        "passed": 11,
+        "failed": 4,
+        "compliance_score": 73
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/multiqc/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should match the tool name and version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have an appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Conda environment should be defined in an environment.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Container directive should use BioContainers with proper format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_definition",
+          "description": "Input section should be properly defined with appropriate staging",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_definition",
+          "description": "Output section should be properly defined with appropriate emit channels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Module should output a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conditional_execution",
+          "description": "Module should include a when directive for conditional execution",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should properly execute the tool with appropriate arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Module should include a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_args",
+          "description": "Module should use task.ext.args for additional arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "software_version",
+          "description": "Software version should be correctly captured in versions.yml",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 12,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/qualimap/bamqc/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow the nf-core naming convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_naming",
+          "description": "Process name should be uppercase and match the module name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Module should have a conda directive pointing to an environment.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Module should have container directives for Docker and Singularity",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input section should use proper format with tuple/path declarations",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output section should use proper format with tuple/path declarations and emit channels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Module should output a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Module should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should properly handle task.ext.args and other parameters",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Module should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "meta_map",
+          "description": "Module should use meta map for sample metadata",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Module should handle prefix correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "resource_labels",
+          "description": "Module should have appropriate process resource labels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "code_formatting",
+          "description": "Code should be properly formatted with consistent indentation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "memory_handling",
+          "description": "Memory should be handled correctly for Java applications",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 15,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/nanoplot/main.nf",
+      "requirements": [
+        {
+          "id": "module_name",
+          "description": "Module name should match the tool name and follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have conda directive pointing to environment.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have container directive with appropriate BioContainers",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input should use tuple val(meta), path() format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output should use tuple val(meta), path() format and include versions.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should use task.ext.args for parameters",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output versions.yml with correct format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_version",
+          "description": "Container version should be pinned to specific version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "code_style",
+          "description": "Code should follow nf-core style guidelines",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an environment.yml file in the same directory",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 13,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/fastqc/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should match the tool name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_tag",
+          "description": "Process should have a tag with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have a label for computational requirements",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have a conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input should use tuple val(meta), path()",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output should include versions.yml and use tuple val(meta), path()",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_args",
+          "description": "Process should use task.ext.args for optional arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_prefix",
+          "description": "Process should use task.ext.prefix for output file naming",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output software version information",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_block",
+          "description": "Process should have a stub block for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "memory_handling",
+          "description": "Process should handle memory allocation appropriately",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_version",
+          "description": "Container version should be pinned to specific version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an environment.yml file in the same directory",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 15,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/samtools/sort/main.nf",
+      "requirements": [
+        {
+          "id": "module_name",
+          "description": "Module name should follow the format TOOL_SUBTOOL",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have an appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Module should have a conda directive pointing to an environment.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Module should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input should use tuple val(meta), path() format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output should use tuple val(meta), path() format and include versions.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_args",
+          "description": "Process should use task.ext.args for command-line arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process should handle prefix correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output software versions correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_check",
+          "description": "Process should check if input and output names are the same",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "cpu_usage",
+          "description": "Process should use task.cpus for multi-threading",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_version",
+          "description": "Container version should be pinned to a specific version",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 14,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/samtools/idxstats/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_tag",
+          "description": "Process should be tagged with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_version",
+          "description": "Container should be pinned to specific version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input should include meta map and required files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output should emit each file type in separate channel with meta map",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conditional_execution",
+          "description": "Process should have conditional execution with task.ext.when",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_args",
+          "description": "Script should use task.ext.args for additional arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process should use task.ext.prefix or meta.id for output file naming",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "cpu_threads",
+          "description": "Process should properly handle CPU threads",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should include a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_extraction",
+          "description": "Versions should be extracted correctly from tool output",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "thread_safety",
+          "description": "Process should handle the case when task.cpus is 1",
+          "status": "failed",
+          "fix": "The '--threads ${task.cpus-1}' could cause an error if task.cpus is 1. Change to '--threads ${Math.max(1, task.cpus-1)}' to ensure it's always at least 1."
+        }
+      ],
+      "summary": {
+        "passed": 15,
+        "failed": 1,
+        "compliance_score": 93.75
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/samtools/faidx/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input should use tuple val(meta), path format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output should use tuple val(meta), path format and include versions.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should use task.ext.args for arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output software versions to versions.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "multiple_inputs",
+          "description": "Multiple inputs should be handled correctly",
+          "status": "failed",
+          "fix": "The second input 'tuple val(meta2), path(fai)' uses a different meta map (meta2) than the first input. For consistency, both inputs should use the same meta map unless there's a specific reason to use different ones. Consider changing to 'tuple val(meta), path(fai)' if both inputs should share the same metadata."
+        },
+        {
+          "id": "optional_outputs",
+          "description": "Optional outputs should be marked correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_documentation",
+          "description": "Output channels should be clearly named and documented",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 12,
+        "failed": 1,
+        "compliance_score": 92.3
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/samtools/index/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_tag",
+          "description": "Process should have a tag directive with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_label",
+          "description": "Process should have a label directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_conda",
+          "description": "Process should have a conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_container",
+          "description": "Process should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_input",
+          "description": "Input should include meta map and input file(s)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_output",
+          "description": "Output should emit each file type in its own channel with meta map",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_versions",
+          "description": "Module should emit a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_when",
+          "description": "Module should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_script",
+          "description": "Script section should use task.ext.args for additional arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_cpus",
+          "description": "Module should handle CPU allocation properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_stub",
+          "description": "Module should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_output_format",
+          "description": "Related output file formats should be in the same channel",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_container_version",
+          "description": "Container version should be pinned to specific version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_error_strategy",
+          "description": "Module should not define error strategy (should be in workflow)",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 15,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/samtools/flagstat/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_tag",
+          "description": "Process should have a tag directive with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have a label directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have a conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_version",
+          "description": "Container version should be pinned",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input section should use tuple val(meta), path() format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output section should use tuple val(meta), path() format and include versions.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should handle args, prefix, and include proper command execution",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output software versions to versions.yml using HEREDOC",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should include a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "threading",
+          "description": "Process should use task.cpus for threading when applicable",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "args_handling",
+          "description": "Process should handle task.ext.args properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process should handle task.ext.prefix properly",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 15,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/samtools/stats/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_naming",
+          "description": "Process name should be uppercase and match the module name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "tag_meta_id",
+          "description": "Process should be tagged with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_versioning",
+          "description": "Container should be version-pinned",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input section should use tuple val(meta) format for sample metadata",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output section should use tuple val(meta) format for sample metadata",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process should output versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conditional_execution",
+          "description": "Process should have conditional execution with task.ext.when",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section should properly implement the tool functionality",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "args_handling",
+          "description": "Process should handle task.ext.args properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process should handle task.ext.prefix properly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "cpu_threads",
+          "description": "Process should use task.cpus for thread count",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_command",
+          "description": "Versions command should correctly extract tool version",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_index_handling",
+          "description": "Input index file should be properly handled",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "reference_handling",
+          "description": "Reference genome should be properly handled",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 19,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/fastp/main.nf",
+      "requirements": [
+        {
+          "id": "module_naming",
+          "description": "Module name should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_tag",
+          "description": "Process should have a tag for logging",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process should have a resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process should have a conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process should have a container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_version",
+          "description": "Container version should be pinned",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_documentation",
+          "description": "Input channels should be properly defined",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_documentation",
+          "description": "Output channels should be properly defined with emit labels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Module should output a versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "when_directive",
+          "description": "Process should have a when directive",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Process should have a script section with proper variable definitions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "stub_section",
+          "description": "Process should have a stub section for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "environment_yml",
+          "description": "Module should have an accompanying environment.yml file",
+          "status": "failed",
+          "fix": "The environment.yml file is referenced in the conda directive but not provided in the component. Create an environment.yml file in the same directory with the appropriate dependencies for fastp."
+        },
+        {
+          "id": "module_test",
+          "description": "Module should have test configuration files",
+          "status": "failed",
+          "fix": "Create test configuration files for the module in the tests/modules/nf-core/fastp/ directory. Include main.nf.test and main.nf.test.snap files following nf-core guidelines."
+        },
+        {
+          "id": "code_style",
+          "description": "Code should follow nf-core style guidelines",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 13,
+        "failed": 2,
+        "compliance_score": 86.67
+      }
+    },
+    {
+      "component_type": "module",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/modules/nf-core/ivar/trim/main.nf",
+      "requirements": [
+        {
+          "id": "module_structure",
+          "description": "Module has correct structure with process definition, inputs, outputs, and versions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_naming",
+          "description": "Process name follows TOOL_SUBTOOL convention in uppercase",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_tagging",
+          "description": "Process has appropriate tag with meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_label",
+          "description": "Process has appropriate resource label",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conda_directive",
+          "description": "Process has conda directive pointing to environment.yml",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_directive",
+          "description": "Process has container directive with both Singularity and Docker options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_format",
+          "description": "Input section follows correct format with meta map",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "output_format",
+          "description": "Output section follows correct format with named emissions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_output",
+          "description": "Process outputs versions.yml file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "conditional_execution",
+          "description": "Process has when directive for conditional execution",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "script_section",
+          "description": "Script section properly formats commands and handles arguments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "prefix_handling",
+          "description": "Process handles prefix correctly using task.ext.prefix or meta.id",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "args_handling",
+          "description": "Process handles task.ext.args correctly",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "versions_extraction",
+          "description": "Process correctly extracts and formats tool version information",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "meta_usage",
+          "description": "Module correctly uses meta map for sample identification",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "bedfile_handling",
+          "description": "Module handles bedfile in a non-standard way by downloading from URL or using local file",
+          "status": "failed",
+          "fix": "The module should not download files from URLs or copy local files within the process. Input files should be provided as proper inputs to the process. Add a new input parameter for the bedfile: 'tuple val(meta), path(bam), path(bedfile)' and remove the download/copy logic."
+        },
+        {
+          "id": "error_handling",
+          "description": "Module includes error handling for invalid inputs",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 16,
+        "failed": 1,
+        "compliance_score": 94
+      }
+    },
+    {
+      "component_type": "workflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/workflows/freyja_only.nf",
+      "requirements": [
+        {
+          "id": "workflow_naming",
+          "description": "Workflow name should follow camelCase convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "workflow_structure",
+          "description": "Workflow should have proper take/main/emit structure",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "channel_documentation",
+          "description": "Input and output channels should have comments describing their structure",
+          "status": "failed",
+          "fix": "Add comments to input and output channels describing their structure, e.g., 'ch_sorted_bam // channel: [mandatory] meta, bam' and 'multiqc_report // channel: [ path(multiqc_report.html) ]'"
+        },
+        {
+          "id": "meta_yml",
+          "description": "Workflow should have a meta.yml file with documentation",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the same directory as the workflow with name, description, keywords, and documentation of input/output channels"
+        },
+        {
+          "id": "parameter_usage",
+          "description": "Named params from parent workflow should not be assumed to be passed to the workflow",
+          "status": "failed",
+          "fix": "Refactor to pass all required parameters as input channels rather than directly accessing params.* variables within the workflow"
+        },
+        {
+          "id": "test_data_reference",
+          "description": "Test data should be referenced with modules_testdata_base_path parameter",
+          "status": "failed",
+          "fix": "When creating tests for this workflow, ensure test data is referenced using params.modules_testdata_base_path"
+        },
+        {
+          "id": "version_tracking",
+          "description": "Workflow should collect and emit software versions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "error_handling",
+          "description": "Workflow should have proper error handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "channel_naming",
+          "description": "Channel names should be descriptive and consistent",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "code_formatting",
+          "description": "Code should be properly formatted and indented",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "workflow_documentation",
+          "description": "Workflow should have header documentation explaining its purpose",
+          "status": "failed",
+          "fix": "Add a header comment section explaining the purpose of the workflow, its inputs, outputs, and how it should be used"
+        },
+        {
+          "id": "test_configuration",
+          "description": "Workflow tests should use a single nextflow.config for ext.args",
+          "status": "failed",
+          "fix": "Create a nextflow.config file for tests that supplies ext.args to the workflow processes"
+        }
+      ],
+      "summary": {
+        "passed": 6,
+        "failed": 6,
+        "compliance_score": 50
+      }
+    },
+    {
+      "component_type": "workflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/workflows/quality_align.nf",
+      "requirements": [
+        {
+          "id": "workflow_naming",
+          "description": "Workflow name should follow camelCase convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "workflow_structure",
+          "description": "Workflow should have proper structure with input/output definitions",
+          "status": "failed",
+          "fix": "Add proper input and output definitions to the workflow. The workflow should have explicit input and output blocks. Example: 'workflow runQualityAlign { input: ... output: ... }'"
+        },
+        {
+          "id": "channel_documentation",
+          "description": "Each input and output channel should have a comment describing its structure",
+          "status": "failed",
+          "fix": "Add comments to describe the structure of each input and output channel. For example: '// channel: [ val(meta), path(reads) ]'"
+        },
+        {
+          "id": "emit_versions",
+          "description": "Workflow should emit a versions channel",
+          "status": "failed",
+          "fix": "Add an explicit emit block that includes the versions channel. Example: 'emit: versions = ch_versions // channel: [ path(versions.yml) ]'"
+        },
+        {
+          "id": "parameter_usage",
+          "description": "Named params from parent workflow should not be assumed to be passed to the workflow",
+          "status": "failed",
+          "fix": "Instead of directly using params.* variables, pass them as input parameters to the workflow or use input value channels"
+        },
+        {
+          "id": "workflow_documentation",
+          "description": "Workflow should have comprehensive documentation",
+          "status": "failed",
+          "fix": "Add a meta.yml file for the workflow that describes its purpose, inputs, outputs, and usage examples"
+        },
+        {
+          "id": "test_configuration",
+          "description": "Workflow should have proper test configuration",
+          "status": "failed",
+          "fix": "Create test files for the workflow including main.nf.test and nextflow.config for testing"
+        },
+        {
+          "id": "error_handling",
+          "description": "Workflow should include proper error handling",
+          "status": "failed",
+          "fix": "Add error handling for critical operations, especially for file existence checks and channel operations"
+        },
+        {
+          "id": "code_organization",
+          "description": "Code should be well-organized with logical sections",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "dsl2_compliance",
+          "description": "Workflow should use DSL2 syntax",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_inclusion",
+          "description": "Modules and subworkflows should be properly included",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 4,
+        "failed": 7,
+        "compliance_score": 36
+      }
+    },
+    {
+      "component_type": "workflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/workflows/aquascope.nf",
+      "requirements": [
+        {
+          "id": "workflow_name",
+          "description": "Workflow name should be in uppercase and match the file name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "workflow_structure",
+          "description": "Workflow should have proper take/main/emit structure",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "version_reporting",
+          "description": "Workflow should collect and report software versions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "workflow_functionality",
+          "description": "Workflow should contain actual processing steps",
+          "status": "failed",
+          "fix": "The workflow is missing actual processing steps. It only collects versions but doesn't perform any data processing. Add modules or subworkflows that process the input samplesheet data."
+        },
+        {
+          "id": "input_validation",
+          "description": "Workflow should validate inputs",
+          "status": "failed",
+          "fix": "Add input validation for the samplesheet channel to ensure it contains the expected format and data."
+        },
+        {
+          "id": "documentation",
+          "description": "Workflow should have header comments explaining its purpose",
+          "status": "failed",
+          "fix": "Add header comments that explain the purpose of the workflow, expected inputs, and outputs."
+        },
+        {
+          "id": "error_handling",
+          "description": "Workflow should include error handling for critical steps",
+          "status": "failed",
+          "fix": "Add error handling for critical processing steps to provide meaningful error messages when failures occur."
+        },
+        {
+          "id": "output_organization",
+          "description": "Workflow should organize outputs in a structured manner",
+          "status": "failed",
+          "fix": "Define and organize workflow outputs beyond just version information. Include processed data outputs in the emit section."
+        },
+        {
+          "id": "minimum_inputs",
+          "description": "Workflow should be able to run with minimal required inputs",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "channel_naming",
+          "description": "Channel names should be descriptive and follow conventions",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 5,
+        "compliance_score": 50
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/local/input_check.nf",
+      "requirements": [
+        {
+          "id": "sw_naming",
+          "description": "Subworkflow name should be in uppercase with underscores",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_input_channel_comments",
+          "description": "Each input channel should have a comment describing the structure",
+          "status": "failed",
+          "fix": "Add comments describing the input channel structure at the beginning of the workflow, e.g., '// input: params.input // string: path to input CSV file or glob pattern for fastq files'"
+        },
+        {
+          "id": "sw_output_channel_comments",
+          "description": "Each output channel should have a comment describing the structure",
+          "status": "failed",
+          "fix": "Add comments describing the output channel structure in the emit block, e.g., '// channel: [ val(meta), path(fastq) ]' for each emitted channel"
+        },
+        {
+          "id": "sw_output_channel_naming",
+          "description": "Output channel names should be based on the major output file type",
+          "status": "failed",
+          "fix": "Rename output channels to match the content type without prefixes like 'raw_'. For example, 'raw_short_reads' should be 'short_reads', 'raw_long_reads' should be 'long_reads', and 'raw_bam' should be 'bam'"
+        },
+        {
+          "id": "sw_required_input_channels",
+          "description": "Input channel declarations must be defined for all possible input files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_meta_yml",
+          "description": "Subworkflow should have a meta.yml file with channel structure documentation",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the same directory with input and output channel descriptions, author information, and other metadata"
+        },
+        {
+          "id": "sw_header_comment",
+          "description": "Subworkflow should have a descriptive header comment",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_function_location",
+          "description": "Helper functions should be defined in a separate file or at the top of the file",
+          "status": "failed",
+          "fix": "Move the 'hasExtension' function to a separate utilities file or clearly separate it from the workflow definition with additional comments"
+        },
+        {
+          "id": "sw_error_handling",
+          "description": "Proper error messages should be provided for invalid inputs",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_test_file",
+          "description": "Subworkflow should have associated tests",
+          "status": "failed",
+          "fix": "Create a tests directory with main.nf.test file that tests the subworkflow functionality using nf-test"
+        }
+      ],
+      "summary": {
+        "passed": 4,
+        "failed": 6,
+        "compliance_score": 40
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/local/ont_trimming.nf",
+      "requirements": [
+        {
+          "id": "1.1",
+          "description": "Minimum subworkflow size",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "1.2",
+          "description": "Version reporting channel",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.1",
+          "description": "Name format of subworkflow files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "4.1",
+          "description": "Usage of parameters",
+          "status": "failed",
+          "fix": "The subworkflow directly uses params.fasta from the parent workflow. This should be passed as an input parameter to the subworkflow instead. Modify the workflow to accept fasta as an input parameter."
+        },
+        {
+          "id": "5.1",
+          "description": "Code comment of channel structure",
+          "status": "failed",
+          "fix": "Add comments describing the structure of input channels. For example: 'bam // channel: [mandatory] meta, bam', 'val_saverejects // boolean: [mandatory]', etc."
+        },
+        {
+          "id": "5.2",
+          "description": "Meta.yml documentation of channel structure",
+          "status": "failed",
+          "fix": "Create a meta.yml file for the subworkflow that describes the input and output channel structures."
+        },
+        {
+          "id": "6.8",
+          "description": "Configuration for nf-tests",
+          "status": "failed",
+          "fix": "Create a nextflow.config file for testing the subworkflow that supplies ext.args to the modules."
+        }
+      ],
+      "summary": {
+        "passed": 3,
+        "failed": 4,
+        "compliance_score": 42.86
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/local/freyja_variant_demix_update/main.nf",
+      "requirements": [
+        {
+          "id": "1.1",
+          "description": "Minimum subworkflow size",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "1.2",
+          "description": "Version reporting channel",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.1",
+          "description": "Name format of subworkflow files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "4.1",
+          "description": "Usage of parameters",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "5.1",
+          "description": "Code comment of channel structure",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "5.2",
+          "description": "Meta.yml documentation of channel structure",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the same directory as main.nf that documents the input and output channel structures."
+        },
+        {
+          "id": "6.1",
+          "description": "Scope of testing",
+          "status": "failed",
+          "fix": "Create tests for the subworkflow using nf-test. At minimum, implement a stub test that replicates the generation of output files."
+        },
+        {
+          "id": "6.8",
+          "description": "Configuration for tests",
+          "status": "failed",
+          "fix": "Create a nextflow.config file for tests that supplies ext.args to the modules used in the subworkflow."
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 3,
+        "compliance_score": 62.5
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/local/trimming.nf",
+      "requirements": [
+        {
+          "id": "1.1",
+          "description": "Minimum subworkflow size",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "1.2",
+          "description": "Version reporting channel",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.1",
+          "description": "Name format of subworkflow files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.2",
+          "description": "Name format of subworkflow parameters",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.3",
+          "description": "Name format subworkflow functions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.4",
+          "description": "Name format subworkflow channels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.5",
+          "description": "Input channel name structure",
+          "status": "failed",
+          "fix": "The input channel 'bam' should be prefixed with 'ch_' to indicate it's a channel with multiple elements."
+        },
+        {
+          "id": "2.6",
+          "description": "Output channel name structure",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "4.1",
+          "description": "Usage of parameters",
+          "status": "failed",
+          "fix": "The subworkflow directly uses 'params.fasta' which should be avoided. Instead, the fasta file should be passed as an input parameter to the subworkflow."
+        },
+        {
+          "id": "5.1",
+          "description": "Code comment of channel structure",
+          "status": "failed",
+          "fix": "The input channel 'bam' is missing a comment describing its structure. Add a comment like: // channel: [ val(meta), path(bam) ]"
+        },
+        {
+          "id": "5.2",
+          "description": "Meta.yml documentation of channel structure",
+          "status": "failed",
+          "fix": "A meta.yml file is required for the subworkflow to document the input and output channel structures."
+        },
+        {
+          "id": "6.8",
+          "description": "Configuration for nf-tests",
+          "status": "failed",
+          "fix": "No evidence of nf-test configuration. A nextflow.config file should be created for testing this subworkflow."
+        }
+      ],
+      "summary": {
+        "passed": 8,
+        "failed": 4,
+        "compliance_score": 67
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/local/bam_sort_stats_samtools/main.nf",
+      "requirements": [
+        {
+          "id": "1.1",
+          "description": "Minimum subworkflow size",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "1.2",
+          "description": "Version reporting channel",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.1",
+          "description": "Name format of subworkflow files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "4.1",
+          "description": "Usage of parameters",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "5.1",
+          "description": "Code comment of channel structure",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "5.2",
+          "description": "Meta.yml documentation of channel structure",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the same directory as main.nf that describes the subworkflow purpose, inputs, outputs and authors. Include detailed descriptions of the channel structures in this file."
+        },
+        {
+          "id": "6.1",
+          "description": "Consistent module imports",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "7.1",
+          "description": "Proper channel handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "8.1",
+          "description": "Proper error handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "9.1",
+          "description": "Proper documentation",
+          "status": "failed",
+          "fix": "Add a README.md file to the subworkflow directory explaining its purpose, usage, and examples."
+        }
+      ],
+      "summary": {
+        "passed": 8,
+        "failed": 2,
+        "compliance_score": 80
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/local/utils_nfcore_aquascope_pipeline/main.nf",
+      "requirements": [
+        {
+          "id": "sw_general_size",
+          "description": "A subworkflow must contain at least two modules",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_version_reporting",
+          "description": "Subworkflow should have a version reporting channel",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_naming_convention",
+          "description": "Subworkflow name should follow the naming convention (all caps with underscores)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_documentation",
+          "description": "Subworkflow should have appropriate documentation comments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_input_output",
+          "description": "Subworkflow should have clearly defined input and output channels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_organization",
+          "description": "Subworkflow should be well-organized with clear sections",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_imports",
+          "description": "Subworkflow should properly import all required modules and functions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_commented_code",
+          "description": "Subworkflow should not contain commented-out code blocks that are not used",
+          "status": "failed",
+          "fix": "Remove or implement the commented-out code block for creating channel from input file. If this is intended for future use, add a TODO comment explaining why it's commented out."
+        },
+        {
+          "id": "sw_error_handling",
+          "description": "Subworkflow should include appropriate error handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_function_documentation",
+          "description": "Functions within the subworkflow should be properly documented",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "sw_todo_comments",
+          "description": "TODO comments should be properly formatted and actionable",
+          "status": "failed",
+          "fix": "The TODO comments in the toolCitationText and toolBibliographyText functions should include specific instructions or be removed if they are no longer needed."
+        }
+      ],
+      "summary": {
+        "passed": 9,
+        "failed": 2,
+        "compliance_score": 82
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/nf-core/utils_nfcore_pipeline/main.nf",
+      "requirements": [
+        {
+          "id": "naming_convention",
+          "description": "Subworkflow name should follow the nf-core naming convention (lowercase with underscores)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "directory_structure",
+          "description": "Subworkflow should be in the correct directory structure (subworkflows/nf-core/)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "minimum_size",
+          "description": "Subworkflow must contain at least two modules",
+          "status": "failed",
+          "fix": "This subworkflow doesn't contain any modules. It only contains utility functions. Consider either adding modules or reclassifying this as a utility script rather than a subworkflow."
+        },
+        {
+          "id": "workflow_definition",
+          "description": "Subworkflow should have a clear workflow definition with input/output channels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "documentation",
+          "description": "Subworkflow should have appropriate documentation and comments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "version_reporting",
+          "description": "Subworkflow should include version reporting functionality",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_definition",
+          "description": "Subworkflow should have clearly defined input and output channels",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "function_organization",
+          "description": "Functions should be properly organized and documented",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "nf_test",
+          "description": "Subworkflow should have associated nf-test files",
+          "status": "failed",
+          "fix": "Create nf-test files for this subworkflow in the tests/subworkflows/nf-core/utils_nfcore_pipeline/ directory with appropriate test cases."
+        },
+        {
+          "id": "test_config",
+          "description": "Subworkflow tests should use a single nextflow.config file",
+          "status": "failed",
+          "fix": "Create a nextflow.config file for tests that supplies ext.args to the subworkflow."
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 3,
+        "compliance_score": 70
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/nf-core/utils_nextflow_pipeline/main.nf",
+      "requirements": [
+        {
+          "id": "subworkflow_naming",
+          "description": "Subworkflow name should follow the nf-core naming convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "subworkflow_size",
+          "description": "Subworkflow must contain at least two modules",
+          "status": "failed",
+          "fix": "This subworkflow doesn't contain any modules. It should include at least two modules or be refactored as a utility function if it's meant to be a collection of helper functions."
+        },
+        {
+          "id": "version_reporting",
+          "description": "Each subworkflow should emit a channel containing all versions.yml collecting the tool(s) versions",
+          "status": "failed",
+          "fix": "Add a versions channel to collect and emit tool versions. For example: 'ch_versions = Channel.empty()' in the take: section and 'versions = ch_versions' in the emit: section."
+        },
+        {
+          "id": "input_output_documentation",
+          "description": "Subworkflow should have clear documentation for inputs and outputs",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "header_documentation",
+          "description": "Subworkflow should have a header with description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "meaningful_emit",
+          "description": "Subworkflow should emit meaningful outputs",
+          "status": "failed",
+          "fix": "Replace 'dummy_emit = true' with meaningful outputs that represent the actual results of the subworkflow's operations."
+        },
+        {
+          "id": "function_documentation",
+          "description": "Functions should be properly documented",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "error_handling",
+          "description": "Subworkflow should include appropriate error handling",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "code_organization",
+          "description": "Code should be well-organized with clear sections",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 6,
+        "failed": 3,
+        "compliance_score": 67
+      }
+    },
+    {
+      "component_type": "subworkflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/subworkflows/nf-core/utils_nfschema_plugin/main.nf",
+      "requirements": [
+        {
+          "id": "1.1",
+          "description": "Minimum subworkflow size - must contain at least two modules",
+          "status": "failed",
+          "fix": "This subworkflow doesn't contain any modules. It only includes functions from the nf-schema plugin. Consider adding at least two modules or reclassifying this as a utility function rather than a subworkflow."
+        },
+        {
+          "id": "1.2",
+          "description": "Version reporting channel - must emit versions channel",
+          "status": "failed",
+          "fix": "Add a versions channel to collect and emit version information. Example: `ch_versions = Channel.empty()` and then `emit: versions = ch_versions`"
+        },
+        {
+          "id": "2.1",
+          "description": "Name format of subworkflow files",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.2",
+          "description": "Name format of subworkflow parameters - must follow snake_case",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.3",
+          "description": "Name format of subworkflow functions - must follow camelCase",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.4",
+          "description": "Name format of subworkflow channels - must follow snake_case",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "2.5",
+          "description": "Input channel name structure - should signify input object type",
+          "status": "failed",
+          "fix": "Rename input parameters to follow the convention: prefix single value inputs with 'val_' (e.g., 'val_validate_params', 'val_parameters_schema') and channel inputs with 'ch_' (e.g., 'ch_input_workflow')."
+        },
+        {
+          "id": "2.6",
+          "description": "Output channel name structure",
+          "status": "failed",
+          "fix": "Rename 'dummy_emit' to follow proper naming conventions. Consider using a more descriptive name like 'ch_validated' or similar that indicates the purpose of the output."
+        },
+        {
+          "id": "5.1",
+          "description": "Code comment of channel structure",
+          "status": "failed",
+          "fix": "Add detailed comments for each input and output channel describing their structure. For example: `// workflow: [mandatory] the workflow object used by nf-schema to get metadata from the workflow`"
+        },
+        {
+          "id": "5.2",
+          "description": "Meta.yml documentation of channel structure",
+          "status": "failed",
+          "fix": "Create a meta.yml file in the same directory with detailed descriptions of input and output channel structures."
+        }
+      ],
+      "summary": {
+        "passed": 4,
+        "failed": 6,
+        "compliance_score": 40
+      }
+    },
+    {
+      "component_type": "main_workflow",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/main.nf",
+      "requirements": [
+        {
+          "id": "main_nf_dsl2",
+          "description": "The main.nf file should use DSL2",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_shebang",
+          "description": "The main.nf file should start with the correct shebang",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_header_comment",
+          "description": "The main.nf file should have a header comment with pipeline name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_workflow_structure",
+          "description": "The main.nf file should define one or more workflows",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_pipeline_initialization",
+          "description": "The main.nf file should include pipeline initialization",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_pipeline_completion",
+          "description": "The main.nf file should include pipeline completion",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_workflow_organization",
+          "description": "Workflows should be organized in separate files and included in main.nf",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_default_workflow",
+          "description": "The main.nf file should define a default workflow entry point",
+          "status": "failed",
+          "fix": "Add a workflow block named 'NFCORE_AQUASCOPE' that calls the main AQUASCOPE workflow. This should be the default entry point when the pipeline is run without specifying a workflow name."
+        },
+        {
+          "id": "main_nf_args_variable",
+          "description": "The args variable should be defined before being used",
+          "status": "failed",
+          "fix": "Define the 'args' variable before using it in the PIPELINE_INITIALISATION calls. This variable is passed to the initialization subworkflow but is not defined in the main.nf file."
+        },
+        {
+          "id": "main_nf_workflow_comments",
+          "description": "Each workflow should have descriptive comments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_code_style",
+          "description": "Code should follow nf-core style guidelines",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_parameter_validation",
+          "description": "The main.nf file should include parameter validation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "main_nf_workflow_naming",
+          "description": "Workflow names should follow nf-core conventions",
+          "status": "failed",
+          "fix": "Rename the main workflow from 'AQUASCOPE' to 'NFCORE_AQUASCOPE' to follow nf-core naming conventions."
+        }
+      ],
+      "summary": {
+        "passed": 10,
+        "failed": 3,
+        "compliance_score": 76.92
+      }
+    },
+    {
+      "component_type": "nextflow_config",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/nextflow.config",
+      "requirements": [
+        {
+          "id": "config_header",
+          "description": "Config file should have a proper header with pipeline name and description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "params_structure",
+          "description": "Parameters should be organized in logical groups with comments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "manifest_section",
+          "description": "Config should include a manifest section with required fields",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "nextflow_version",
+          "description": "Nextflow version should be specified with correct syntax",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_profiles",
+          "description": "Config should include standard container profiles (docker, singularity, etc.)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "pipeline_info",
+          "description": "Config should include timeline, report, trace and dag sections",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "schema_plugin",
+          "description": "Config should include the nf-schema plugin",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "nf_core_branding",
+          "description": "Pipeline should use nf-core branding in manifest",
+          "status": "failed",
+          "fix": "Update manifest name to 'nf-core/aquascope' instead of 'CDCGov-Aquascope' to follow nf-core naming convention"
+        },
+        {
+          "id": "config_includes",
+          "description": "Config should include base and modules configs",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "environment_variables",
+          "description": "Config should set appropriate environment variables to prevent conflicts",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "syntax_error",
+          "description": "Config file should have valid Nextflow syntax",
+          "status": "failed",
+          "fix": "Remove the trailing '# Limit code size to avoid token limits' comment at the end of the plugins section which causes a syntax error"
+        },
+        {
+          "id": "doi_field",
+          "description": "DOI field should be properly filled",
+          "status": "failed",
+          "fix": "Replace the placeholder space in the DOI field with an actual DOI or remove it if not available yet"
+        },
+        {
+          "id": "custom_profiles",
+          "description": "Custom profiles should be properly documented",
+          "status": "failed",
+          "fix": "Add comments to explain the purpose of custom profiles like 'scicomp_rosalind', 'test_illumina', etc."
+        }
+      ],
+      "summary": {
+        "passed": 10,
+        "failed": 3,
+        "compliance_score": 77
+      }
+    },
+    {
+      "component_type": "schema_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/nextflow_schema.json",
+      "requirements": [
+        {
+          "id": "schema_structure",
+          "description": "The schema file should follow the JSON schema draft 2020-12 format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "schema_id",
+          "description": "The schema should have a valid $id URL pointing to the repository",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "schema_title",
+          "description": "The schema should have a title that follows the nf-core naming convention",
+          "status": "failed",
+          "fix": "Change title to 'nf-core/aquascope pipeline parameters' to follow nf-core naming convention"
+        },
+        {
+          "id": "schema_description",
+          "description": "The schema should have a clear description of the pipeline purpose",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "schema_sections",
+          "description": "The schema should have appropriate sections for different parameter groups",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "institutional_config",
+          "description": "The schema should include standard institutional config options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "generic_options",
+          "description": "The schema should include standard generic options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "input_output_options",
+          "description": "The schema should have well-defined input/output options",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "absolute_paths",
+          "description": "The schema should not contain hardcoded absolute file paths",
+          "status": "failed",
+          "fix": "Replace absolute paths in 'fasta', 'gff', and 'gff3' properties with relative paths or use parameters that can be configured by users"
+        },
+        {
+          "id": "parameter_descriptions",
+          "description": "All parameters should have clear descriptions",
+          "status": "failed",
+          "fix": "Add descriptions for 'fasta', 'gff', 'gff3', 'freyja_db_name', and 'bed' parameters"
+        },
+        {
+          "id": "parameter_organization",
+          "description": "Parameters should be organized in appropriate sections",
+          "status": "failed",
+          "fix": "Move reference-related parameters ('fasta', 'gff', 'gff3', 'bed') to a dedicated reference section in the schema"
+        },
+        {
+          "id": "parameter_validation",
+          "description": "Parameters should have appropriate validation rules",
+          "status": "failed",
+          "fix": "Add validation rules (exists, format, etc.) for reference files like 'fasta', 'gff', 'gff3', and 'bed'"
+        },
+        {
+          "id": "fa_icons",
+          "description": "Parameters should have appropriate Font Awesome icons",
+          "status": "failed",
+          "fix": "Add fa_icon properties for 'fasta', 'gff', 'gff3', 'freyja_db_name', and 'bed' parameters"
+        },
+        {
+          "id": "help_text",
+          "description": "Complex parameters should have help_text for additional explanation",
+          "status": "failed",
+          "fix": "Add help_text for reference parameters to explain their purpose and format requirements"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 7,
+        "compliance_score": 50
+      }
+    },
+    {
+      "component_type": "documentation_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/LICENSE",
+      "requirements": [
+        {
+          "id": "license_type",
+          "description": "Pipelines must be open source, released with the MIT license",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "license_format",
+          "description": "License file should contain the standard MIT license text",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "license_copyright",
+          "description": "License should include appropriate copyright information",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "license_year",
+          "description": "License should include the year of copyright",
+          "status": "failed",
+          "fix": "Add the year of copyright to the license, e.g., 'Copyright (c) 2023 Arun Boddapati, Matthew Hunter, ...'"
+        }
+      ],
+      "summary": {
+        "passed": 3,
+        "failed": 1,
+        "compliance_score": 75
+      }
+    },
+    {
+      "component_type": "documentation_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/README.md",
+      "requirements": [
+        {
+          "id": "readme_introduction",
+          "description": "README should have a clear introduction explaining the purpose of the pipeline",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "readme_badges",
+          "description": "README should include appropriate badges (Nextflow, conda, docker, singularity)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "readme_documentation_link",
+          "description": "README should link to comprehensive documentation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "readme_contributions",
+          "description": "README should include information about contributions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "readme_citations",
+          "description": "README should mention citations",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "readme_nf_core_branding",
+          "description": "README should include nf-core branding and acknowledgment",
+          "status": "failed",
+          "fix": "Add nf-core branding and acknowledgment to the README. Include the nf-core logo and a statement acknowledging if the pipeline is based on nf-core templates or guidelines."
+        },
+        {
+          "id": "readme_installation",
+          "description": "README should include installation instructions",
+          "status": "failed",
+          "fix": "Add a section with detailed installation instructions, including prerequisites and dependencies."
+        },
+        {
+          "id": "readme_usage",
+          "description": "README should include basic usage examples",
+          "status": "failed",
+          "fix": "Add a 'Usage' section with basic command examples showing how to run the pipeline with default and custom parameters."
+        },
+        {
+          "id": "readme_parameters",
+          "description": "README should mention key parameters or link to parameter documentation",
+          "status": "failed",
+          "fix": "Add a section describing key parameters or provide a link to comprehensive parameter documentation."
+        },
+        {
+          "id": "readme_output",
+          "description": "README should describe pipeline outputs or link to output documentation",
+          "status": "failed",
+          "fix": "Add a section describing the main outputs of the pipeline or provide a link to detailed output documentation."
+        },
+        {
+          "id": "readme_license",
+          "description": "README should mention the license",
+          "status": "failed",
+          "fix": "Add a section specifying the license under which the pipeline is distributed."
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 6,
+        "compliance_score": 45
+      }
+    },
+    {
+      "error": "Failed to parse LLM response as JSON",
+      "raw_response": "I'll analyze the CHANGELOG.md file against nf-core guidelines.\n\n```json\n{\n  \"component_type\": \"documentation_file\",\n  \"path\": \"/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/CHANGELOG.md\",\n  \"requirements\": [\n    {\n      \"id\": \"changelog_format\",\n      \"description\": \"CHANGELOG.md should follow the Keep a Changelog format\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"semantic_versioning\",\n      \"description\": \"Project should adhere to Semantic Versioning\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"changelog_sections\",\n      \"description\": \"Changes should be categorized into appropriate sections (Added, Changed, Fixed, etc.)\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"changelog_entries\",\n      \"description\": \"Each change should have a clear description and attribution\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"dev_section\",\n      \"description\": \"Should have a 'dev' section for unreleased changes\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"version_ordering\",\n      \"description\": \"Versions should be listed in reverse chronological order (newest first)\",\n      \"status\": \"passed\",\n      \"fix\": \"\"\n    },\n    {\n      \"id\": \"consistent_formatting\",\n      \"description\": \"Formatting should be consistent throughout the document\",\n      \"status\": \"failed\",\n      \"fix\": \"Standardize section headings. Some versions use mixed formats like 'Added/Fixed' while others use separate sections like 'Added', 'Fixed', 'Docs', etc. Maintain consistent section naming across all versions.\"\n    },\n    {\n      \"id\": \"pr_references\",\n      \"description\": \"Pull request references should be consistently formatted\",\n      \"status\": \"failed\",\n      \"fix\": \"Standardize PR references. Some are formatted as '#XX' while others use full URLs like 'https://github.com/CDCgov/aquascope/pull/XX'. Use a consistent format throughout, preferably the shorter '#XX' format.\"\n    },\n    {\n      \"id\": \"commit_references\",\n      \"description\": \"Commit references should be consistently formatted\",\n      \"status\": \"failed\",\n      \"fix\": \"Standardize commit references. Currently using full SHA hashes in some places. Consider using shortened commit hashes consistently or linking them properly.\"\n    },\n    {\n      \"id\": \"initial_release\",\n      \"description\": \"Initial release should have proper date and description\",\n      \"status\": \"failed\",\n      \"fix\": \"Update the initial release entry 'v1.0dev - [date]' with the actual release date.\"\n    }\n  ],\n  \"summary\": {\n    \"passed\": 6,\n    \"failed\": 4,\n    \"compliance_score\": 60\n  }\n}\n```",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/CHANGELOG.md",
+      "component_type": "documentation_file"
+    },
+    {
+      "component_type": "documentation_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/CITATIONS.md",
+      "requirements": [
+        {
+          "id": "citations_file_exists",
+          "description": "Pipeline has a CITATIONS.md file",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "nf_core_citation",
+          "description": "nf-core framework is properly cited",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "nextflow_citation",
+          "description": "Nextflow is properly cited",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "tools_citations",
+          "description": "Pipeline tools are properly cited",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "container_citations",
+          "description": "Software packaging/containerisation tools are properly cited",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "pipeline_specific_citations",
+          "description": "Pipeline-specific tools and methods are cited",
+          "status": "failed",
+          "fix": "Add citations for any pipeline-specific tools, algorithms, or methods used in the aquascope pipeline. Each tool should include author, title, journal, and DOI/PMID where available."
+        },
+        {
+          "id": "citation_format",
+          "description": "Citations follow a consistent format with proper links",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 6,
+        "failed": 1,
+        "compliance_score": 85.7
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/test_bam.config",
+      "requirements": [
+        {
+          "id": "config_naming",
+          "description": "Config file should have a clear, descriptive name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_header",
+          "description": "Config file should have a clear header comment explaining its purpose",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_data_reference",
+          "description": "Test data should be referenced using modules_testdata_base_path parameter",
+          "status": "failed",
+          "fix": "Replace direct paths to test data with references using params.modules_testdata_base_path. For example, replace '${projectDir}/assets/references/SARS-CoV-2.reference.fasta' with references to the nf-core test datasets repository."
+        },
+        {
+          "id": "config_profile_description",
+          "description": "Test config should have config_profile_name and config_profile_description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "typo_in_path",
+          "description": "Paths should be correctly specified without typos",
+          "status": "failed",
+          "fix": "Fix the typo in the gff3 path: '${projectDir}/assests/references/SARS-CoV-2.reference.gff3' should be '${projectDir}/assets/references/SARS-CoV-2.reference.gff3'"
+        },
+        {
+          "id": "resource_limits",
+          "description": "Resource limits should be defined appropriately",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_data_reuse",
+          "description": "Test configs should reuse existing test data when possible",
+          "status": "failed",
+          "fix": "Instead of using custom test data in the assets directory, use existing SARS-CoV-2 test data from the nf-core test datasets repository where possible."
+        },
+        {
+          "id": "config_structure",
+          "description": "Config file should have a clean, organized structure",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 3,
+        "compliance_score": 62.5
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/scicomp.config",
+      "requirements": [
+        {
+          "id": "config_file_location",
+          "description": "Config file should be in the conf/ directory",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_naming",
+          "description": "Config file should have a descriptive name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_header",
+          "description": "Config file should have a descriptive header comment",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_profile_description",
+          "description": "Config profiles should have description, contact and URL",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_profile_structure",
+          "description": "Config profiles should be properly structured",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_container_settings",
+          "description": "Container settings should be properly configured",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_resource_settings",
+          "description": "Resource settings should be properly configured",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_executor_settings",
+          "description": "Executor settings should be properly configured",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_consistency",
+          "description": "Config file should be consistent with nf-core style",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_documentation",
+          "description": "Config options should be well documented with comments",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_indentation",
+          "description": "Config file should use consistent indentation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_organization",
+          "description": "Config file should be well-organized with logical sections",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 12,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/test_illumina.config",
+      "requirements": [
+        {
+          "id": "config_naming",
+          "description": "Config file should have appropriate naming convention",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_header",
+          "description": "Config file should have appropriate header documentation",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_profile_description",
+          "description": "Config should include profile name and description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_syntax",
+          "description": "Config file should have valid Nextflow syntax",
+          "status": "failed",
+          "fix": "Remove the '#' comment line at the end of the file and replace with proper Nextflow comment syntax using /* */ or //"
+        },
+        {
+          "id": "path_validity",
+          "description": "All file paths should be valid and consistent",
+          "status": "failed",
+          "fix": "Fix the typo in the path: '${projectDir}/assests/references/SARS-CoV-2.reference.gff3' should be '${projectDir}/assets/references/SARS-CoV-2.reference.gff3'"
+        },
+        {
+          "id": "resource_definitions",
+          "description": "Resource definitions should be appropriate and clear",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_data_references",
+          "description": "Test data should be properly referenced",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_organization",
+          "description": "Config should be well-organized with logical grouping",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 6,
+        "failed": 2,
+        "compliance_score": 75
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/test_ont.config",
+      "requirements": [
+        {
+          "id": "config_file_naming",
+          "description": "Config file should follow nf-core naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_header",
+          "description": "Config file should have a proper header with description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_structure",
+          "description": "Config file should have a clear structure with process and params sections",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_typo",
+          "description": "Config file should not contain typos or incorrect paths",
+          "status": "failed",
+          "fix": "Fix the typo in the path: 'assests' should be 'assets' in the gff3 parameter"
+        },
+        {
+          "id": "config_file_comments",
+          "description": "Config file should have appropriate comments for clarity",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_profile_name",
+          "description": "Test profile should have a descriptive name",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_test_data",
+          "description": "Test config should point to valid test data",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_file_syntax",
+          "description": "Config file should have valid Nextflow syntax",
+          "status": "failed",
+          "fix": "Remove the stray '# Limit code size to avoid token limits' comment at the end of the file as it's not valid Nextflow syntax"
+        },
+        {
+          "id": "config_file_resource_limits",
+          "description": "Resource limits should be defined appropriately",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 2,
+        "compliance_score": 77.8
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/base.config",
+      "requirements": [
+        {
+          "id": "config_header",
+          "description": "Config file should have a proper header with pipeline name and description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "base_config_structure",
+          "description": "base.config should define basic process resource requirements",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "resource_labels",
+          "description": "Should use standard nf-core resource labels (process_low, process_medium, etc.)",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "todo_removal",
+          "description": "TODO comments should be addressed and removed before release",
+          "status": "failed",
+          "fix": "Remove the TODO comment '// TODO nf-core: Customise requirements for specific processes.' once process-specific requirements have been properly configured."
+        },
+        {
+          "id": "error_strategy",
+          "description": "Should have appropriate error handling strategies",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "resource_scaling",
+          "description": "Resources should scale with task.attempt for retry capability",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "memory_specification",
+          "description": "Memory should be specified in GB format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "time_specification",
+          "description": "Time limits should be specified in appropriate format",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_organization",
+          "description": "Config should be well-organized and follow nf-core conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "process_labels",
+          "description": "Should include standard process labels that match nf-core modules",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 9,
+        "failed": 1,
+        "compliance_score": 90
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/test.config",
+      "requirements": [
+        {
+          "id": "test_config_purpose",
+          "description": "The test.config file should define minimal test dataset to check pipeline function",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_profile",
+          "description": "The test.config should define a proper test profile name and description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_input",
+          "description": "The test.config should define test input data",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_resources",
+          "description": "The test.config should define minimal resources for testing",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_genome",
+          "description": "The test.config should specify a genome reference if needed by the pipeline",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_path",
+          "description": "The test.config should be located in the conf directory",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_input_path",
+          "description": "Test data should use the params.pipelines_testdata_base_path variable",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_content",
+          "description": "The test.config should contain appropriate comments explaining its purpose and usage",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_consistency",
+          "description": "The test.config should be consistent with other pipeline configuration files",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 9,
+        "failed": 0,
+        "compliance_score": 100
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/test_iontorrent.config",
+      "requirements": [
+        {
+          "id": "config_header",
+          "description": "Config file should have a proper header with description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "config_naming",
+          "description": "Config file should follow naming conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_content",
+          "description": "Test config should only contain minimal settings needed for testing",
+          "status": "failed",
+          "fix": "The test config contains both process and params resource limits. Keep only the params.resourceLimits and remove the process.resourceLimits section to avoid duplication."
+        },
+        {
+          "id": "test_config_paths",
+          "description": "Test data paths should use projectDir for relative paths",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_typos",
+          "description": "Config should not contain typos or errors",
+          "status": "failed",
+          "fix": "There's a typo in the gff3 path: 'assests' should be 'assets'"
+        },
+        {
+          "id": "test_config_syntax",
+          "description": "Config should have valid Nextflow syntax",
+          "status": "failed",
+          "fix": "There's a syntax error at the end of the file - an unexpected '#' character. Remove this comment or format it properly with '//' for single line or '/*...*/' for multi-line comments."
+        },
+        {
+          "id": "test_config_profile",
+          "description": "Test config should have appropriate profile name and description",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "test_config_resources",
+          "description": "Test config should have reasonable resource limits for CI testing",
+          "status": "passed",
+          "fix": ""
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 3,
+        "compliance_score": 62.5
+      }
+    },
+    {
+      "component_type": "config_file",
+      "path": "/Users/arunbodd/Documents/Work/Nextflow_pipelines/aquascope/conf/modules.config",
+      "requirements": [
+        {
+          "id": "config_structure",
+          "description": "Config file should have appropriate structure and organization",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "ext_args_format",
+          "description": "ext.args should be defined as closures when appropriate",
+          "status": "failed",
+          "fix": "Convert simple string ext.args to closures for proper evaluation. For example, change 'ext.args = '--quiet'' to 'ext.args = { '--quiet' }' and change array-joined ext.args to proper closures that return joined strings."
+        },
+        {
+          "id": "publishdir_format",
+          "description": "publishDir should be properly formatted",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "module_naming",
+          "description": "Module names should follow nf-core conventions",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "multi_command_piping",
+          "description": "Multi-command piping should be avoided unless necessary",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "parameter_documentation",
+          "description": "Parameters should be well-documented",
+          "status": "passed",
+          "fix": ""
+        },
+        {
+          "id": "consistent_formatting",
+          "description": "Config should have consistent formatting and indentation",
+          "status": "failed",
+          "fix": "Fix inconsistent indentation throughout the file. Some blocks use tabs while others use spaces. Standardize on spaces for indentation."
+        },
+        {
+          "id": "pattern_consistency",
+          "description": "File patterns should be consistent",
+          "status": "failed",
+          "fix": "Fix inconsistent pattern formats. For example, in 'MINIMAP2_ALIGN_LONG', the pattern is '*.{bam,.bai}' which has an incorrect comma before .bai, while other modules use '*.{bam,bai}'"
+        },
+        {
+          "id": "mode_consistency",
+          "description": "publishDir mode should be consistent",
+          "status": "failed",
+          "fix": "Some modules use hardcoded mode values like 'mode: \"copy\"' while others use 'mode: params.publish_dir_mode'. Standardize to use params.publish_dir_mode throughout."
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 4,
+        "compliance_score": 55.56
+      }
+    }
+  ],
+  "summary": {
+    "total_components": 51,
+    "total_requirements": 569,
+    "passed_requirements": 421,
+    "compliance_score": 73.99
+  }
+}
