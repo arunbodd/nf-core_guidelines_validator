@@ -10,6 +10,14 @@ import datetime
 class ReportGenerator:
     """Generate reports from validation results"""
     
+    def __init__(self, report: Dict[str, Any] = None):
+        """Initialize the report generator
+        
+        Args:
+            report: Report dictionary (optional)
+        """
+        self.report = report
+    
     def json_to_markdown(self, json_path: str, markdown_path: str) -> None:
         """Convert JSON report to Markdown
         
@@ -183,3 +191,45 @@ class ReportGenerator:
             return __version__
         except ImportError:
             return "0.1.0"
+            
+    def generate_json_report(self, output_path: str = None) -> str:
+        """Generate a JSON report
+        
+        Args:
+            output_path: Path to save the report (JSON)
+            
+        Returns:
+            Path to the saved report
+        """
+        if not self.report:
+            raise ValueError("No report data available")
+            
+        if output_path is None:
+            pipeline_name = os.path.basename(self.report.get('pipeline_path', 'unknown'))
+            output_path = f"{pipeline_name}_compliance_report.json"
+            
+        with open(output_path, "w") as f:
+            json.dump(self.report, f, indent=2)
+            
+        return output_path
+    
+    def generate_markdown_report(self, output_path: str = None) -> str:
+        """Generate a Markdown report
+        
+        Args:
+            output_path: Path to save the report (Markdown)
+            
+        Returns:
+            Path to the saved report
+        """
+        if not self.report:
+            raise ValueError("No report data available")
+            
+        if output_path is None:
+            pipeline_name = os.path.basename(self.report.get('pipeline_path', 'unknown'))
+            output_path = f"{pipeline_name}_compliance_report.md"
+            
+        with open(output_path, 'w') as f:
+            f.write(self._generate_markdown(self.report))
+            
+        return output_path
