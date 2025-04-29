@@ -1,4 +1,5 @@
 # nf-core Validator
+![My Logo](https://raw.githubusercontent.com/arunbodd/nf-core_guidelines_validator/refs/heads/dev/docs/architecture.svg)
 
 An AI-powered agent for validating nf-core pipeline compliance. This tool analyzes Nextflow pipelines against the official nf-core guidelines and provides detailed recommendations for improving compliance.
 
@@ -10,6 +11,7 @@ An AI-powered agent for validating nf-core pipeline compliance. This tool analyz
 - **AI-Powered**: Leverages large language models to understand complex requirements and provide context-aware suggestions
 - **Interactive Chat**: Query the nf-core documentation directly with natural language questions
 - **Categorized Results**: View validation results and chat responses organized by documentation category
+- **Multi-Model Support**: Supports OpenAI GPT-4 and Anthropic Claude 3.7 Sonnet models
 
 ## Installation
 
@@ -48,8 +50,11 @@ This will create a vector store of nf-core guidelines in the current directory.
 ### 2. Validate a Pipeline
 
 ```bash
-# Validate a pipeline
+# Validate a pipeline (default: OpenAI GPT-4)
 nfcore-validator validate /path/to/your/pipeline --format markdown
+
+# Validate using Anthropic Claude 3.7 Sonnet
+nfcore-validator validate /path/to/your/pipeline --model-provider anthropic --anthropic-api-key $ANTHROPIC_API_KEY --format markdown
 ```
 
 This will:
