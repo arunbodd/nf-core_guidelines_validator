@@ -10,28 +10,76 @@ from langchain.schema import SystemMessage, HumanMessage
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 
+# Add imports for Claude and Windsurf models
+from langchain.chat_models import ChatAnthropic
+from langchain.embeddings import HuggingFaceEmbeddings
+import anthropic  # Direct import of the anthropic library
+
 class NfCoreValidator:
     """LLM-based validator for nf-core pipeline components"""
     
-    def __init__(self, vectorstore_path: str = "nfcore_vectorstore", openai_api_key: str = None):
+    def __init__(self, vectorstore_path: str = "nfcore_vectorstore", openai_api_key: str = None, 
+                 model_provider: str = "openai", anthropic_api_key: str = None):
         """Initialize the validator
         
         Args:
             vectorstore_path: Path to the vector store with nf-core documentation
             openai_api_key: OpenAI API key for LLM and embeddings
+            model_provider: Which model provider to use ('openai', 'anthropic', or 'windsurf')
+            anthropic_api_key: Anthropic API key for Claude models
         """
-        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+        self.model_provider = model_provider.lower()
         
-        if not self.openai_api_key:
-            raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable or pass it directly.")
+        # Set up the appropriate model based on provider
+        if self.model_provider == "openai":
+            self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
             
-        self.llm = ChatOpenAI(
-            temperature=0, 
-            model="gpt-4",
-            openai_api_key=self.openai_api_key
-        )
+            if not self.openai_api_key:
+                raise ValueError("OpenAI API key is required for OpenAI models. Set OPENAI_API_KEY environment variable or pass it directly.")
+                
+            self.llm = ChatOpenAI(
+                temperature=0, 
+                model="gpt-4",
+                openai_api_key=self.openai_api_key
+            )
+            
+            self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+            
+        elif self.model_provider == "anthropic":
+            self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
+            
+            if not self.anthropic_api_key:
+                raise ValueError("Anthropic API key is required for Claude models. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
+            
+            # Create a direct Anthropic client
+            print("Using direct Anthropic API integration")
+            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+            
+            # Use the correct Claude model name
+            # Available models: claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307
+            self.anthropic_model = "claude-3-7-sonnet-20250219"
+            
+            # We'll use a custom method for calling the Anthropic API
+            # The llm attribute will be a placeholder
+            self.llm = None
+            
+            # For embeddings, we'll use a local model or fall back to OpenAI if available
+            if openai_api_key or os.environ.get("OPENAI_API_KEY"):
+                self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+                self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+            else:
+                # Use a local embedding model as fallback
+                self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+                
+        elif self.model_provider == "windsurf":
+            # Windsurf model implementation
+            # This would need to be implemented based on Windsurf's API
+            raise NotImplementedError("Windsurf model integration is not yet implemented")
+            
+        else:
+            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai', 'anthropic', or 'windsurf'")
         
-        self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+        # Load the vector store
         self.vectorstore = FAISS.load_local(vectorstore_path, self.embeddings)
         
         self.system_prompt = """You are an nf-core pipeline compliance expert. Your task is to analyze the provided pipeline component against the official nf-core guidelines.
@@ -128,24 +176,61 @@ Be thorough and check against ALL relevant nf-core requirements for the componen
         {guidelines}
         """
         
-        # Query LLM
-        response = self.llm([
-            SystemMessage(content=self.system_prompt),
-            HumanMessage(content=prompt)
-        ])
+        # Query LLM based on provider
+        if self.model_provider == "anthropic":
+            response_content = self._query_anthropic(self.system_prompt, prompt)
+        else:
+            # Use standard LangChain interface for OpenAI
+            response = self.llm([
+                SystemMessage(content=self.system_prompt),
+                HumanMessage(content=prompt)
+            ])
+            response_content = response.content
         
         # Parse response
         try:
-            result = json.loads(response.content)
+            result = json.loads(response_content)
             result["path"] = component_path  # Ensure path is included
+            result["component_type"] = file_type  # Add component type for reporting
             return result
         except json.JSONDecodeError:
             return {
                 "error": "Failed to parse LLM response as JSON",
-                "raw_response": response.content,
-                "path": component_path
+                "raw_response": response_content,
+                "path": component_path,
+                "component_type": file_type
             }
+    
+    def _query_anthropic(self, system_prompt, user_prompt):
+        """Query the Anthropic API directly
+        
+        Args:
+            system_prompt: System prompt for the LLM
+            user_prompt: User prompt for the LLM
             
+        Returns:
+            Response content from the LLM
+        """
+        try:
+            # Use the Anthropic client directly with streaming to avoid timeouts
+            with self.anthropic_client.messages.stream(
+                model=self.anthropic_model,
+                max_tokens=4000,
+                temperature=0,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": user_prompt}
+                ]
+            ) as stream:
+                response_text = ""
+                for text in stream.text_stream:
+                    response_text += text
+                    
+                return response_text
+        except Exception as e:
+            print(f"Error querying Anthropic API: {str(e)}")
+            raise
+
     def _determine_component_type(self, path: str) -> str:
         """Determine the type of component based on path
         
