@@ -5,15 +5,11 @@ import os
 from typing import Dict, List, Any, Optional
 import json
 
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage, HumanMessage, AIMessage
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 
-# Add imports for Claude and Windsurf models
-from langchain.chat_models import ChatAnthropic
-from langchain.embeddings import HuggingFaceEmbeddings
-import anthropic  # Direct import of the anthropic library
+# Import model clients only when needed
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 class NfCoreDocChat:
     """Chat interface for nf-core documentation"""
@@ -24,11 +20,13 @@ class NfCoreDocChat:
         
         Args:
             vectorstore_path: Path to the vector store with nf-core documentation
-            openai_api_key: OpenAI API key for LLM and embeddings
-            model_provider: Which model provider to use ('openai', 'anthropic', or 'windsurf')
-            anthropic_api_key: Anthropic API key for Claude models
+            openai_api_key: OpenAI API key for LLM (required only if model_provider is 'openai')
+            model_provider: Which model provider to use ('openai' or 'anthropic')
+            anthropic_api_key: Anthropic API key for Claude models (required only if model_provider is 'anthropic')
         """
         self.model_provider = model_provider.lower()
+        self.llm = None
+        self.anthropic_client = None
         
         # Set up the appropriate model based on provider
         if self.model_provider == "openai":
@@ -37,13 +35,13 @@ class NfCoreDocChat:
             if not self.openai_api_key:
                 raise ValueError("OpenAI API key is required for OpenAI models. Set OPENAI_API_KEY environment variable or pass it directly.")
                 
+            # Import only when needed
+            from langchain_community.chat_models import ChatOpenAI
             self.llm = ChatOpenAI(
                 temperature=0, 
                 model="gpt-4",
                 openai_api_key=self.openai_api_key
             )
-            
-            self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
             
         elif self.model_provider == "anthropic":
             self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
@@ -51,33 +49,26 @@ class NfCoreDocChat:
             if not self.anthropic_api_key:
                 raise ValueError("Anthropic API key is required for Claude models. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
             
+            # Import only when needed
+            import anthropic
             # Create a direct Anthropic client
             print("Using direct Anthropic API integration")
             self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
             self.anthropic_model = "claude-3-7-sonnet-20250219"
-            
-            # We'll use a custom method for calling the Anthropic API
-            # The llm attribute will be a placeholder
-            self.llm = None
-            
-            # For embeddings, we'll use a local model or fall back to OpenAI if available
-            if openai_api_key or os.environ.get("OPENAI_API_KEY"):
-                self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
-                self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
-            else:
-                # Use a local embedding model as fallback
-                self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
                 
-        elif self.model_provider == "windsurf":
-            # Windsurf model implementation
-            # This would need to be implemented based on Windsurf's API
-            raise NotImplementedError("Windsurf model integration is not yet implemented")
-            
         else:
-            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai', 'anthropic', or 'windsurf'")
+            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai' or 'anthropic'")
         
-        # Load the vector store
-        self.vectorstore = FAISS.load_local(vectorstore_path, self.embeddings)
+        # Always use HuggingFace embeddings for vector search
+        print(f"Loading vector store from {vectorstore_path} with HuggingFace embeddings")
+        self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        
+        # Load the vector store with allow_dangerous_deserialization flag
+        self.vectorstore = FAISS.load_local(
+            vectorstore_path, 
+            self.embeddings,
+            allow_dangerous_deserialization=True
+        )
         
         # Initialize chat history
         self.chat_history = []
@@ -95,18 +86,20 @@ For each answer:
 
 Remember that you're helping users create compliant nf-core pipelines."""
         
-    def ask(self, question: str, k: int = 5) -> Dict[str, Any]:
+    def ask(self, question: str, k: int = 5, show_sources: bool = False, context_size: int = 5) -> Dict[str, Any]:
         """Ask a question about nf-core documentation
         
         Args:
             question: The question to ask
             k: Number of relevant documents to retrieve
+            show_sources: Whether to include sources in the response
+            context_size: Number of documents to include in the context
             
         Returns:
             Dictionary with answer and sources
         """
         # Retrieve relevant documents
-        docs = self.vectorstore.similarity_search(question, k=k)
+        docs = self.vectorstore.similarity_search(question, k=context_size or k)
         
         # Categorize sources by documentation section
         categorized_docs = self._categorize_sources(docs)
@@ -164,31 +157,69 @@ Remember that you're helping users create compliant nf-core pipelines."""
                 "category": category
             })
         
-        return {
-            "answer": response.content,
-            "sources": sources,
-            "categories": self._get_unique_categories(sources)
-        }
+        # Format the answer based on whether to show sources
+        answer_text = response.content
+        if show_sources:
+            # Group sources by category
+            categorized_sources = {}
+            for source in sources:
+                category = source["category"]
+                if category not in categorized_sources:
+                    categorized_sources[category] = []
+                categorized_sources[category].append(source)
+            
+            # Add formatted sources to the answer
+            answer_text += "\n\n## Sources\n"
+            for category, category_sources in categorized_sources.items():
+                answer_text += f"\n### {category}\n"
+                for i, source in enumerate(category_sources):
+                    answer_text += f"- **Source {i+1}:** {source['source']}\n"
+                    if len(source['content']) > 200:
+                        answer_text += f"  {source['content'][:200]}...\n"
+                    else:
+                        answer_text += f"  {source['content']}\n"
+        
+        return answer_text if show_sources else response.content
         
     def _call_anthropic_api(self, messages):
-        # Convert messages to a format suitable for the Anthropic API
-        api_messages = []
+        """Call the Anthropic API directly
+        
+        Args:
+            messages: List of LangChain message objects
+            
+        Returns:
+            AIMessage with the response content
+        """
+        # Extract system message
+        system_content = ""
         for msg in messages:
             if isinstance(msg, SystemMessage):
-                api_messages.append({"role": "system", "content": msg.content})
-            elif isinstance(msg, HumanMessage):
-                api_messages.append({"role": "user", "content": msg.content})
+                system_content = msg.content
+                break
         
-        # Call the Anthropic API
-        response = self.anthropic_client.complete(
-            messages=api_messages,
-            model=self.anthropic_model,
-            temperature=0
-        )
+        # Extract human and AI messages
+        human_ai_messages = []
+        for msg in messages:
+            if isinstance(msg, HumanMessage):
+                human_ai_messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                human_ai_messages.append({"role": "assistant", "content": msg.content})
         
-        # Convert the response to a HumanMessage
-        return HumanMessage(content=response.generated_text)
-        
+        try:
+            # Call Anthropic API
+            response = self.anthropic_client.messages.create(
+                model=self.anthropic_model,
+                max_tokens=4000,
+                system=system_content,
+                messages=human_ai_messages
+            )
+            
+            # Convert to LangChain AIMessage
+            return AIMessage(content=response.content[0].text)
+        except Exception as e:
+            # Return error message
+            return AIMessage(content=f"Error: {str(e)}")
+            
     def _categorize_sources(self, docs):
         """Categorize sources by documentation section
         
@@ -196,9 +227,10 @@ Remember that you're helping users create compliant nf-core pipelines."""
             docs: List of documents
             
         Returns:
-            Dictionary with categories as keys and lists of documents as values
+            Dictionary of categorized documents
         """
         categorized = {}
+        
         for doc in docs:
             source = doc.metadata.get('source', 'Unknown')
             category = self._determine_doc_category(source)
@@ -206,41 +238,48 @@ Remember that you're helping users create compliant nf-core pipelines."""
             if category not in categorized:
                 categorized[category] = []
                 
-            categorized[category].append(doc)
+            categorized[category].append({
+                "content": doc.page_content,
+                "source": source
+            })
             
         return categorized
-        
+            
     def _determine_doc_category(self, source_url):
-        """Determine the category of a document based on its URL
+        """Determine the category of a document based on its source URL
         
         Args:
-            source_url: URL of the document
+            source_url: Source URL of the document
             
         Returns:
             Category string
         """
         if not source_url or source_url == "Unknown":
-            return "General"
+            return "Other"
             
-        # Map URL patterns to categories
-        category_patterns = {
-            "modules": "Module Guidelines",
-            "subworkflows": "Subworkflow Guidelines",
-            "test_data": "Test Data Guidelines",
-            "pipeline_file_structure": "Pipeline Structure",
-            "pipelines/overview": "Pipeline Overview",
-            "pipelines/nextflow_schema": "Nextflow Schema",
-            "pipelines/linting": "Linting Guidelines",
-            "pipelines/ci_testing": "CI Testing",
-            "pipelines/release": "Release Guidelines"
-        }
+        # Check for Excel source
+        if source_url.startswith("excel_template:"):
+            return "Excel Guidelines"
+            
+        # Extract category from URL
+        url_parts = source_url.split("/")
         
-        for pattern, category in category_patterns.items():
-            if pattern in source_url:
-                return category
-                
-        return "Other Guidelines"
-        
+        # Identify modules
+        if "components/modules" in source_url:
+            return "Modules"
+        elif "components/subworkflows" in source_url:
+            return "Subworkflows"
+        elif "components/test_data" in source_url:
+            return "Test Data"
+        elif "pipeline_file_structure" in source_url:
+            return "Pipeline Structure"
+        elif "pipelines" in source_url:
+            return "Pipeline Guidelines"
+        elif "components" in source_url:
+            return "Component Guidelines"
+        else:
+            return "General Guidelines"
+            
     def _get_unique_categories(self, sources):
         """Get unique categories from sources
         
@@ -250,8 +289,13 @@ Remember that you're helping users create compliant nf-core pipelines."""
         Returns:
             List of unique categories
         """
-        return sorted(list(set(source.get("category", "Other") for source in sources)))
-    
+        categories = set()
+        for source in sources:
+            categories.add(source.get("category", "Other"))
+            
+        return list(categories)
+        
     def clear_history(self):
         """Clear chat history"""
         self.chat_history = []
+        return "Chat history cleared."

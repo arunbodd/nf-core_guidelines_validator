@@ -12,13 +12,16 @@ An AI-powered agent for validating nf-core pipeline compliance. This tool analyz
 - **Interactive Chat**: Query the nf-core documentation directly with natural language questions
 - **Categorized Results**: View validation results and chat responses organized by documentation category
 - **Multi-Model Support**: Supports OpenAI GPT-4 and Anthropic Claude 3.7 Sonnet models
+- **No OpenAI Dependency**: Uses HuggingFace embeddings by default with no API key requirement for harvesting
+- **Excel Template Option**: Can use Excel templates with structured guidelines as an alternative to web-based guidelines
+- **Multiple Report Formats**: Generate reports in JSON, Markdown, and XML formats
 
 ## Installation
 
 ### Prerequisites
 
 - Python 3.8 or higher
-- OpenAI API key
+- Either an OpenAI API key OR an Anthropic API key (required only for validate and chat commands, not for harvest)
 
 ### Install from source
 
@@ -35,26 +38,56 @@ pip install -e .
 
 ### 1. Harvest nf-core Documentation
 
-Before validating pipelines, you need to harvest the nf-core documentation:
+Before validating pipelines, you need to harvest the nf-core documentation. You have two options:
+
+#### Option A: Web-based Guidelines
+
+Harvest guidelines directly from the nf-core website:
 
 ```bash
-# Set your OpenAI API key
-export OPENAI_API_KEY="your-api-key"
-
-# Harvest documentation
+# Using HuggingFace embeddings (default, no API key required)
 nfcore-validator harvest
+
+# The following still works but the OpenAI/Anthropic keys are not used for harvesting
+# API keys are only stored for compatibility with later commands
+nfcore-validator harvest --openai-api-key "your-api-key"
+nfcore-validator harvest --anthropic-api-key "your-anthropic-api-key"
 ```
 
-This will create a vector store of nf-core guidelines in the current directory.
+#### Option B: Excel Template
+
+Use a structured Excel template containing pipeline requirements:
+
+```bash
+# Using Excel template (no API key required)
+nfcore-validator harvest --excel-template path/to/guidelines.xlsx
+```
+
+The harvest command will create a vector store in different default locations depending on the source:
+- Web-based harvesting: `nfcore_vectorstore/` 
+- Excel-based harvesting: `excel_vectorstore/`
+
+You can specify a custom output location with the `--output` parameter:
+```bash
+nfcore-validator harvest --excel-template path/to/guidelines.xlsx --output custom_vectorstore
+```
+
+Either method will create a vector store of nf-core guidelines in the current directory.
 
 ### 2. Validate a Pipeline
 
 ```bash
 # Validate a pipeline (default: OpenAI GPT-4)
-nfcore-validator validate /path/to/your/pipeline --format markdown
+# API key required for this command
+nfcore-validator validate /path/to/your/pipeline --format markdown --openai-api-key $OPENAI_API_KEY
 
 # Validate using Anthropic Claude 3.7 Sonnet
+# API key required for this command
 nfcore-validator validate /path/to/your/pipeline --model-provider anthropic --anthropic-api-key $ANTHROPIC_API_KEY --format markdown
+
+# Validate using Excel template as the requirements source
+# API key still required based on model provider
+nfcore-validator validate /path/to/your/pipeline --excel-template path/to/guidelines.xlsx --format markdown --openai-api-key $OPENAI_API_KEY
 ```
 
 This will:
@@ -67,22 +100,28 @@ This will:
 You can also directly query the nf-core documentation using natural language:
 
 ```bash
-# Start the chat interface
-nfcore-validator chat
+# Start the chat interface with OpenAI (API key required)
+nfcore-validator chat --openai-api-key $OPENAI_API_KEY
 
-# Show sources for answers
-nfcore-validator chat --show-sources
+# Start the chat interface with Anthropic Claude (API key required)
+nfcore-validator chat --model-provider anthropic --anthropic-api-key $ANTHROPIC_API_KEY
+
+# Show sources for answers (works with both OpenAI and Anthropic)
+nfcore-validator chat --show-sources --openai-api-key $OPENAI_API_KEY
 
 # Increase context size for more comprehensive answers
-nfcore-validator chat --context-size 15
+nfcore-validator chat --context-size 15 --openai-api-key $OPENAI_API_KEY
 ```
 
-## Report Format
+The `--show-sources` flag displays the source documents used to generate the answer, organized by documentation category.
 
-The tool generates two types of reports:
+## Report Formats
+
+The tool generates three types of reports:
 
 1. **JSON Report**: Contains all validation details in a structured format
 2. **Markdown Report**: Human-readable summary with component details and recommendations
+3. **XML Report**: Compliance report in XML format for integration with other tools
 
 The enhanced markdown report includes:
 
@@ -120,13 +159,16 @@ Example markdown report:
 ### Custom Vector Store Location
 
 ```bash
+# No API key required for harvest
 nfcore-validator harvest --output /path/to/vectorstore
-nfcore-validator validate /path/to/pipeline --vectorstore /path/to/vectorstore
+
+# API key required for validate based on model provider
+nfcore-validator validate /path/to/pipeline --vectorstore /path/to/vectorstore --openai-api-key $OPENAI_API_KEY
 ```
 
 ### Rate Limit Handling
 
-The validator automatically handles OpenAI API rate limits by:
+The validator automatically handles API rate limits by:
 - Processing components gradually
 - Waiting and retrying when rate limits are hit
 - Adding small delays between API calls
@@ -134,7 +176,7 @@ The validator automatically handles OpenAI API rate limits by:
 You can also reduce parallelism to further avoid rate limits:
 
 ```bash
-python -m nfcore_validator.cli.main validate /path/to/pipeline --max-workers 2
+python -m nfcore_validator.cli.main validate /path/to/pipeline --max-workers 2 --openai-api-key $OPENAI_API_KEY
 ```
 
 ### Categorized Chat
@@ -142,7 +184,8 @@ python -m nfcore_validator.cli.main validate /path/to/pipeline --max-workers 2
 The chat interface categorizes information by documentation section:
 
 ```bash
-nfcore-validator chat --show-sources
+# API key required based on model provider
+nfcore-validator chat --show-sources --openai-api-key $OPENAI_API_KEY
 ```
 
 This will display sources grouped by categories like:
@@ -151,13 +194,22 @@ This will display sources grouped by categories like:
 - Pipeline Structure
 - Test Data Guidelines
 
-## How It Works
+## System Architecture
 
-1. **Documentation Harvesting**: The tool extracts all guidelines from the official nf-core documentation website
-2. **Vector Embedding**: Guidelines are converted to vector embeddings for semantic search
-3. **Component Analysis**: For each pipeline component, the tool retrieves relevant guidelines
-4. **AI Validation**: An LLM analyzes the component against the guidelines and generates recommendations
-5. **Report Generation**: Results are compiled into comprehensive reports
+The nf-core validator consists of several components working together:
+
+1. **Documentation Harvester**: Scrapes the nf-core documentation website and creates embeddings
+2. **Excel Harvester**: Alternative approach that loads guidelines from an Excel template
+3. **Pipeline Scanner**: Identifies and organizes pipeline components for validation
+4. **Validator**: LLM-based system that checks components against guidelines
+5. **Chat Interface**: Interactive Q&A system for nf-core documentation
+6. **Report Generator**: Creates formatted reports in JSON, Markdown, and XML
+
+For each component, you can choose between:
+- OpenAI's GPT-4 or Anthropic's Claude 3.7 Sonnet for LLM-based analysis (validate/chat)
+- HuggingFace embeddings (default) for harvesting documentation and creating vector embeddings
+
+For detailed technical information, see [How It Works](docs/how_it_works.md).
 
 ## License
 

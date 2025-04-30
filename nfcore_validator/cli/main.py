@@ -10,15 +10,32 @@ import datetime
 from pathlib import Path
 
 from ..harvester.docs_harvester import NfCoreDocsHarvester
+from ..harvester.excel_harvester import ExcelGuidelinesHarvester
 from ..scanner.pipeline_scanner import PipelineScanner
 from ..chat.chat_interface import NfCoreDocChat
 from ..utils.report_generator import ReportGenerator
 
 def harvest_command(args):
     """Handle the harvest command"""
-    print(f"Harvesting nf-core documentation...")
+    # Set the default output location based on harvest source
+    if args.excel_template and not args.output_specified:
+        args.output = "excel_vectorstore"
+        print(f"Using default Excel vectorstore path: {args.output}")
+        
+    if args.excel_template:
+        print(f"Harvesting nf-core guidelines from Excel template: {args.excel_template}")
+        harvester = ExcelGuidelinesHarvester(
+            args.excel_template, 
+            openai_api_key=args.openai_api_key,
+            anthropic_api_key=args.anthropic_api_key
+        )
+    else:
+        print(f"Harvesting nf-core documentation from website...")
+        harvester = NfCoreDocsHarvester(
+            openai_api_key=args.openai_api_key,
+            anthropic_api_key=args.anthropic_api_key
+        )
     
-    harvester = NfCoreDocsHarvester(openai_api_key=args.api_key)
     vectorstore = harvester.harvest(args.output)
     
     print(f"Documentation harvested and stored in {args.output}")
@@ -32,9 +49,10 @@ def validate_command(args):
     scanner = PipelineScanner(
         args.pipeline_path, 
         args.vectorstore,
-        openai_api_key=args.api_key,
+        openai_api_key=args.openai_api_key,
         model_provider=args.model_provider,
-        anthropic_api_key=args.anthropic_api_key
+        anthropic_api_key=args.anthropic_api_key,
+        excel_template=args.excel_template
     )
     
     report = scanner.scan_pipeline(max_workers=args.max_workers)
@@ -52,6 +70,13 @@ def validate_command(args):
             Path(json_path).with_suffix(".md")
         )
         print(f"Markdown report saved to: {md_path}")
+    
+    # XML report if requested
+    if args.format == "xml" or args.format == "both":
+        xml_path = report_generator.generate_xml_report(
+            Path(json_path).with_suffix(".xml")
+        )
+        print(f"XML report saved to: {xml_path}")
         
     return report
 
@@ -61,7 +86,7 @@ def chat_command(args):
     
     chat = NfCoreDocChat(
         vectorstore_path=args.vectorstore,
-        openai_api_key=args.api_key,
+        openai_api_key=args.openai_api_key,
         model_provider=args.model_provider,
         anthropic_api_key=args.anthropic_api_key
     )
@@ -101,12 +126,12 @@ def main():
     # Common arguments
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser.add_argument(
-        "--api-key", 
+        "--openai-api-key", 
         help="OpenAI API key (defaults to OPENAI_API_KEY environment variable)"
     )
     parent_parser.add_argument(
         "--model-provider",
-        choices=["openai", "anthropic", "windsurf"],
+        choices=["openai", "anthropic"],
         default="openai",
         help="Model provider to use (default: openai)"
     )
@@ -124,7 +149,11 @@ def main():
     harvest_parser.add_argument(
         "--output", 
         default="nfcore_vectorstore",
-        help="Output directory for vector store (default: nfcore_vectorstore)"
+        help="Output directory for vector store (default depends on harvest source)"
+    )
+    harvest_parser.add_argument(
+        "--excel-template",
+        help="Path to Excel template with nf-core guidelines"
     )
     
     # Validate command
@@ -143,14 +172,18 @@ def main():
         help="Path to the vector store (default: nfcore_vectorstore)"
     )
     validate_parser.add_argument(
+        "--excel-template",
+        help="Path to Excel template with nf-core guidelines"
+    )
+    validate_parser.add_argument(
         "--output",
         help="Output path for the report (default: <pipeline_name>_compliance_report.json)"
     )
     validate_parser.add_argument(
         "--format",
-        choices=["json", "markdown", "both"],
+        choices=["json", "markdown", "xml", "both"],
         default="both",
-        help="Report format (default: both)"
+        help="Report format (default: both - generates all formats)"
     )
     validate_parser.add_argument(
         "--max-workers",
@@ -184,17 +217,23 @@ def main():
     
     args = parser.parse_args()
     
+    # Track whether output was explicitly specified
+    if args.command == "harvest":
+        # Check if --output was explicitly provided
+        args.output_specified = "--output" in sys.argv
+    
     # Check for required API keys based on model provider
-    if args.model_provider == "openai":
-        if not args.api_key and not os.environ.get("OPENAI_API_KEY"):
-            print("Error: OpenAI API key is required. Set OPENAI_API_KEY environment variable or use --api-key.")
-            return 1
-    elif args.model_provider == "anthropic":
-        if not args.anthropic_api_key and not os.environ.get("ANTHROPIC_API_KEY"):
-            print("Error: Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or use --anthropic-api-key.")
-            return 1
-    elif args.model_provider == "windsurf":
-        print("Note: Windsurf model provider is experimental and may not be fully supported.")
+    if args.command == "validate" or args.command == "chat":
+        if args.model_provider == "openai":
+            if not args.openai_api_key and not os.environ.get("OPENAI_API_KEY"):
+                print("Error: OpenAI API key is required. Set OPENAI_API_KEY environment variable or use --openai-api-key.")
+                return 1
+        elif args.model_provider == "anthropic":
+            if not args.anthropic_api_key and not os.environ.get("ANTHROPIC_API_KEY"):
+                print("Error: Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or use --anthropic-api-key.")
+                return 1
+                
+    # No API key checks for harvest command - it uses HuggingFace embeddings by default
     
     if args.command == "harvest":
         harvest_command(args)

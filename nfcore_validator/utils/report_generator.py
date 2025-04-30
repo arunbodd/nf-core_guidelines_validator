@@ -6,6 +6,9 @@ import json
 from typing import Dict, Any, List
 from collections import Counter
 import datetime
+from pathlib import Path
+import xml.dom.minidom as md
+import xml.etree.ElementTree as ET
 
 class ReportGenerator:
     """Generate reports from validation results"""
@@ -231,5 +234,157 @@ class ReportGenerator:
             
         with open(output_path, 'w') as f:
             f.write(self._generate_markdown(self.report))
+            
+        return output_path
+
+    def generate_xml_report(self, output_path: str = None) -> str:
+        """Generate an XML compliance report based on the specified format
+        
+        Args:
+            output_path: Path to save the report
+            
+        Returns:
+            Path to the saved report
+        """
+        if output_path is None:
+            output_path = f"{os.path.basename(self.report.get('pipeline_path', 'unknown'))}_compliance_report.xml"
+        
+        # Create root element
+        root = ET.Element("compliance_report")
+        
+        # Extract components and group by category from Excel template
+        components = self.report.get("components", [])
+        categories = {}
+        
+        # Group requirements by category and subcategory
+        for component in components:
+            for req in component.get("requirements", []):
+                req_id = req.get("id", "unknown")
+                # Check if this is a category.subcategory format ID (e.g., "5.2")
+                parts = req_id.split('.')
+                
+                # Try to determine category and subcategory
+                if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                    category = f"Section {parts[0]}"
+                    subcategory = f"{parts[0]}.{parts[1]}"
+                else:
+                    # Use component type as fallback category
+                    category = component.get("component_type", "other").replace("_", " ").title()
+                    subcategory = req_id
+                
+                if category not in categories:
+                    categories[category] = {}
+                    
+                if subcategory not in categories[category]:
+                    categories[category][subcategory] = {
+                        "requirements": [],
+                        "components": set()
+                    }
+                
+                # Add component path to affected components
+                categories[category][subcategory]["components"].add(component.get("path", ""))
+                
+                # Only add requirement if not already present
+                req_exists = False
+                for existing_req in categories[category][subcategory]["requirements"]:
+                    if existing_req["description"] == req.get("description", ""):
+                        req_exists = True
+                        # Update affected components info
+                        if component.get("path") not in existing_req.get("affected_components", []):
+                            existing_req.setdefault("affected_components", []).append(component.get("path"))
+                        break
+                
+                if not req_exists:
+                    # Create a copy with affected components
+                    req_copy = req.copy()
+                    req_copy["affected_components"] = [component.get("path")]
+                    categories[category][subcategory]["requirements"].append(req_copy)
+        
+        # Create XML structure
+        for category, subcategories in categories.items():
+            for subcategory, data in subcategories.items():
+                for req in data["requirements"]:
+                    req_element = ET.SubElement(root, "requirement")
+                    
+                    # Name element (using ID and description)
+                    name_element = ET.SubElement(req_element, "name")
+                    name_element.text = f"{req.get('id', 'Unknown')} - {req.get('description', '')}"
+                    
+                    # Met element (Yes/No)
+                    met_element = ET.SubElement(req_element, "met")
+                    met_element.text = "Yes" if req.get("status") == "passed" else "No"
+                    
+                    # Notes element
+                    notes_element = ET.SubElement(req_element, "notes")
+                    
+                    # Build notes content
+                    notes_content = ""
+                    
+                    # If requirement failed, add affected components and fixes
+                    if req.get("status") != "passed":
+                        # Add affected components
+                        notes_content += "Non-compliant components:\n"
+                        for comp_path in req.get("affected_components", []):
+                            notes_content += f"- {os.path.basename(comp_path)} ({comp_path})\n"
+                        
+                        # Add reason for non-compliance
+                        notes_content += "\nReason for non-compliance:\n"
+                        notes_content += f"- {req.get('description', 'Not specified')}\n"
+                        
+                        # Add suggestion for compliance
+                        notes_content += "\nSuggestion for achieving compliance:\n"
+                        notes_content += f"- {req.get('fix', 'Not specified')}\n"
+                    else:
+                        notes_content = "This requirement is met."
+                        
+                    notes_element.text = notes_content
+        
+        # Check if this is a non-pipeline format
+        is_pipeline_format = any(c.get("component_type") == "main_workflow" for c in components)
+        
+        # Add non-compliant check for empty self.report
+        if not self.report:
+            raise ValueError("No report data available")
+            
+        if not is_pipeline_format:
+            # Add non-pipeline format section
+            non_pipeline = ET.SubElement(root, "non_pipeline_format")
+            
+            # Find script files
+            script_files = []
+            for component in components:
+                path = component.get("path", "")
+                if path.endswith(('.sh', '.py', '.pl', '.R')):
+                    script_files.append(path)
+            
+            # Build content for non-pipeline format
+            content = "This workflow is not in the standard nf-core pipeline format.\n\n"
+            
+            # List existing scripts
+            content += "Script files found:\n"
+            for script in script_files:
+                content += f"- {os.path.basename(script)} ({script})\n"
+                
+            # Instructions for converting
+            content += "\nTo convert to nf-core pipeline format:\n"
+            content += "1. Create a standard nf-core pipeline structure using nf-core tools:\n"
+            content += "   nf-core create -n [pipeline_name]\n\n"
+            content += "2. Organize scripts into proper modules:\n"
+            content += "   - Move processing scripts to modules/local/\n"
+            content += "   - Create proper Nextflow modules with inputs, outputs, and documentation\n\n"
+            content += "3. Create a main workflow (main.nf) that imports and runs the modules\n\n"
+            content += "4. Add proper configuration (nextflow.config, modules.config)\n\n"
+            content += "5. Add documentation (README.md, CITATION.md)\n\n"
+            content += "6. Add proper testing (tests directory)"
+            
+            non_pipeline.text = content
+        
+        # Format the XML with pretty printing
+        xml_str = ET.tostring(root, encoding='unicode')
+        pretty_xml = md.parseString(xml_str).toprettyxml(indent="  ")
+        
+        # Write to file
+        with open(output_path, "w") as f:
+            f.write(pretty_xml)
             
         return output_path

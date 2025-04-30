@@ -10,29 +10,44 @@ import time
 import re
 
 from ..validator.llm_validator import NfCoreValidator
+from ..validator.excel_validator import ExcelValidator
 
 class PipelineScanner:
     """Scanner for nf-core pipeline compliance"""
     
     def __init__(self, pipeline_path: str, vectorstore_path: str = "nfcore_vectorstore", 
                  openai_api_key: str = None, model_provider: str = "openai", 
-                 anthropic_api_key: str = None):
+                 anthropic_api_key: str = None, excel_template: str = None):
         """Initialize the scanner
         
         Args:
             pipeline_path: Path to the pipeline to scan
             vectorstore_path: Path to the vector store with nf-core documentation
             openai_api_key: OpenAI API key for LLM and embeddings
-            model_provider: Which model provider to use ('openai', 'anthropic', or 'windsurf')
+            model_provider: Which model provider to use ('openai' or 'anthropic')
             anthropic_api_key: Anthropic API key for Claude models
+            excel_template: Path to Excel template with requirements (optional)
         """
         self.pipeline_path = os.path.abspath(pipeline_path)
-        self.validator = NfCoreValidator(
-            vectorstore_path=vectorstore_path, 
-            openai_api_key=openai_api_key,
-            model_provider=model_provider,
-            anthropic_api_key=anthropic_api_key
-        )
+        
+        # Set up the appropriate validator based on whether Excel template is provided
+        if excel_template:
+            self.validator = ExcelValidator(
+                excel_path=excel_template,
+                vectorstore_path=vectorstore_path,
+                openai_api_key=openai_api_key,
+                model_provider=model_provider,
+                anthropic_api_key=anthropic_api_key
+            )
+            print(f"Using Excel-based validator with template: {excel_template}")
+        else:
+            self.validator = NfCoreValidator(
+                vectorstore_path=vectorstore_path, 
+                openai_api_key=openai_api_key,
+                model_provider=model_provider,
+                anthropic_api_key=anthropic_api_key
+            )
+            print("Using LLM-based validator with nf-core documentation")
         
         if not os.path.exists(self.pipeline_path):
             raise ValueError(f"Pipeline path does not exist: {self.pipeline_path}")

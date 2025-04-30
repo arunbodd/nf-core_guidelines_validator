@@ -6,27 +6,29 @@ import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 
-from langchain.document_loaders import WebBaseLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 
 class NfCoreDocsHarvester:
     """Harvests nf-core documentation and creates a vector store for retrieval"""
     
-    def __init__(self, openai_api_key: str = None):
+    def __init__(self, openai_api_key: str = None, anthropic_api_key: str = None):
         """Initialize the harvester
         
         Args:
-            openai_api_key: OpenAI API key for embeddings
+            openai_api_key: OpenAI API key for embeddings (optional, not used with default HuggingFace embeddings)
+            anthropic_api_key: Anthropic API key (optional, not used with default HuggingFace embeddings)
         """
         self.base_url = "https://nf-co.re/docs/guidelines/components"
         self.docs_dir = "nfcore_docs"
-        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
         
-        if not self.openai_api_key:
-            raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable or pass it directly.")
-            
+        # Store API keys but only for compatibility - not used for harvesting
+        # which uses HuggingFace embeddings by default
+        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+        self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
+        
         os.makedirs(self.docs_dir, exist_ok=True)
 
     def _get_all_doc_urls(self) -> List[str]:
@@ -112,8 +114,8 @@ class NfCoreDocsHarvester:
         
         print(f"Split into {len(splits)} chunks")
         
-        print("Creating vector embeddings (this may take a while)...")
-        embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+        print("Creating vector embeddings using HuggingFace (this may take a while)...")
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         vectorstore = FAISS.from_documents(splits, embeddings)
         
         print(f"Saving vector store to {vectorstore_path}")

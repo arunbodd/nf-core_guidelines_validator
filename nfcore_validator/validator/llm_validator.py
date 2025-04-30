@@ -5,14 +5,11 @@ import os
 import json
 from typing import Dict, Any, List, Optional
 
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage, HumanMessage
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 
-# Add imports for Claude and Windsurf models
-from langchain.chat_models import ChatAnthropic
-from langchain.embeddings import HuggingFaceEmbeddings
+# Import model clients only when needed
+from langchain_community.chat_models import ChatOpenAI, ChatAnthropic
 import anthropic  # Direct import of the anthropic library
 
 class NfCoreValidator:
@@ -24,11 +21,13 @@ class NfCoreValidator:
         
         Args:
             vectorstore_path: Path to the vector store with nf-core documentation
-            openai_api_key: OpenAI API key for LLM and embeddings
-            model_provider: Which model provider to use ('openai', 'anthropic', or 'windsurf')
-            anthropic_api_key: Anthropic API key for Claude models
+            openai_api_key: OpenAI API key for LLM (required only if model_provider is 'openai')
+            model_provider: Which model provider to use ('openai' or 'anthropic')
+            anthropic_api_key: Anthropic API key for Claude models (required only if model_provider is 'anthropic')
         """
         self.model_provider = model_provider.lower()
+        self.llm = None
+        self.anthropic_client = None
         
         # Set up the appropriate model based on provider
         if self.model_provider == "openai":
@@ -43,8 +42,6 @@ class NfCoreValidator:
                 openai_api_key=self.openai_api_key
             )
             
-            self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
-            
         elif self.model_provider == "anthropic":
             self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
             
@@ -56,31 +53,21 @@ class NfCoreValidator:
             self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
             
             # Use the correct Claude model name
-            # Available models: claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307
             self.anthropic_model = "claude-3-7-sonnet-20250219"
-            
-            # We'll use a custom method for calling the Anthropic API
-            # The llm attribute will be a placeholder
-            self.llm = None
-            
-            # For embeddings, we'll use a local model or fall back to OpenAI if available
-            if openai_api_key or os.environ.get("OPENAI_API_KEY"):
-                self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
-                self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
-            else:
-                # Use a local embedding model as fallback
-                self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
                 
-        elif self.model_provider == "windsurf":
-            # Windsurf model implementation
-            # This would need to be implemented based on Windsurf's API
-            raise NotImplementedError("Windsurf model integration is not yet implemented")
-            
         else:
-            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai', 'anthropic', or 'windsurf'")
+            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai' or 'anthropic'")
         
-        # Load the vector store
-        self.vectorstore = FAISS.load_local(vectorstore_path, self.embeddings)
+        # Always use HuggingFace embeddings for vectorstore
+        print(f"Loading vector store from {vectorstore_path} with HuggingFace embeddings")
+        self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        
+        # Load the vector store with allow_dangerous_deserialization flag
+        self.vectorstore = FAISS.load_local(
+            vectorstore_path, 
+            self.embeddings, 
+            allow_dangerous_deserialization=True
+        )
         
         self.system_prompt = """You are an nf-core pipeline compliance expert. Your task is to analyze the provided pipeline component against the official nf-core guidelines.
 
@@ -181,6 +168,7 @@ Be thorough and check against ALL relevant nf-core requirements for the componen
             response_content = self._query_anthropic(self.system_prompt, prompt)
         else:
             # Use standard LangChain interface for OpenAI
+            from langchain.schema import SystemMessage, HumanMessage
             response = self.llm([
                 SystemMessage(content=self.system_prompt),
                 HumanMessage(content=prompt)
@@ -202,34 +190,27 @@ Be thorough and check against ALL relevant nf-core requirements for the componen
             }
     
     def _query_anthropic(self, system_prompt, user_prompt):
-        """Query the Anthropic API directly
+        """Call the Anthropic API with the given prompts
         
         Args:
-            system_prompt: System prompt for the LLM
-            user_prompt: User prompt for the LLM
+            system_prompt: System prompt
+            user_prompt: User prompt
             
         Returns:
-            Response content from the LLM
+            Response content as string
         """
         try:
-            # Use the Anthropic client directly with streaming to avoid timeouts
-            with self.anthropic_client.messages.stream(
+            response = self.anthropic_client.messages.create(
                 model=self.anthropic_model,
                 max_tokens=4000,
-                temperature=0,
                 system=system_prompt,
                 messages=[
                     {"role": "user", "content": user_prompt}
                 ]
-            ) as stream:
-                response_text = ""
-                for text in stream.text_stream:
-                    response_text += text
-                    
-                return response_text
+            )
+            return response.content[0].text
         except Exception as e:
-            print(f"Error querying Anthropic API: {str(e)}")
-            raise
+            raise ValueError(f"Error calling Anthropic API: {str(e)}")
 
     def _determine_component_type(self, path: str) -> str:
         """Determine the type of component based on path
