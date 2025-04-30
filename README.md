@@ -1,5 +1,5 @@
 # nf-core Validator
-![My Logo](https://raw.githubusercontent.com/arunbodd/nf-core_guidelines_validator/refs/heads/dev/docs/architecture.svg)
+![My Logo](https://raw.githubusercontent.com/arunbodd/nf-core_guidelines_validator/refs/heads/dev/docs/Architecture_Diagram.svg)
 
 An AI-powered agent for validating nf-core pipeline compliance. This tool analyzes Nextflow pipelines against the official nf-core guidelines and provides detailed recommendations for improving compliance.
 
