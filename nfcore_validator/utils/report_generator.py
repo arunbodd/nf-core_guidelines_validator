@@ -83,6 +83,54 @@ class ReportGenerator:
         md.append(f"- **Failed Requirements:** {summary.get('total_requirements', 0) - summary.get('passed_requirements', 0)}\n")
         md.append(f"- **Compliance Score:** {summary.get('compliance_score', 0)}%\n\n")
         
+        # Classification Compliance Table
+        md.append("## Classification Compliance Breakdown\n")
+        md.append("| Classification | Definition | Category | Subcategory | Files not passing the definition |\n")
+        md.append("|---------------|------------|----------|-------------|----------------------------------|\n")
+        
+        # Group failed requirements by classification/category/subcategory
+        classification_failures = {}
+        for component in components:
+            component_path = component.get('path', 'Unknown')
+            for req in component.get('requirements', []):
+                if req.get('status') == 'failed':
+                    classification = req.get('classification', 'Unknown')
+                    category = req.get('category', 'Unknown') 
+                    subcategory = req.get('subcategory', 'Unknown')
+                    definition = req.get('description', 'No description')
+                    
+                    # Create unique key for this requirement
+                    key = f"{classification}|{category}|{subcategory}|{definition}"
+                    
+                    if key not in classification_failures:
+                        classification_failures[key] = {
+                            'classification': classification,
+                            'definition': definition,
+                            'category': category,
+                            'subcategory': subcategory,
+                            'failed_files': []
+                        }
+                    
+                    # Add the failed file
+                    filename = os.path.basename(component_path)
+                    if filename not in classification_failures[key]['failed_files']:
+                        classification_failures[key]['failed_files'].append(filename)
+        
+        # Sort by classification, then category, then subcategory
+        sorted_failures = sorted(classification_failures.values(), 
+                               key=lambda x: (x['classification'], x['category'], x['subcategory']))
+        
+        for failure in sorted_failures:
+            classification = failure['classification'] or 'Unknown'
+            definition = failure['definition'][:100] + '...' if len(failure['definition']) > 100 else failure['definition']
+            category = failure['category'] or 'Unknown'
+            subcategory = failure['subcategory'] or 'Unknown'
+            failed_files = ', '.join(failure['failed_files'])
+            
+            md.append(f"| {classification} | {definition} | {category} | {subcategory} | {failed_files} |\n")
+        
+        md.append("\n")
+        
         # Component type breakdown
         md.append("## Component Type Breakdown\n")
         md.append("| Component Type | Count | Avg. Compliance |\n")

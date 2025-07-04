@@ -14,19 +14,16 @@ from langchain_community.vectorstores import FAISS
 class NfCoreDocsHarvester:
     """Harvests nf-core documentation and creates a vector store for retrieval"""
     
-    def __init__(self, openai_api_key: str = None, anthropic_api_key: str = None):
+    def __init__(self, anthropic_api_key: str = None):
         """Initialize the harvester
         
         Args:
-            openai_api_key: OpenAI API key for embeddings (optional, not used with default HuggingFace embeddings)
-            anthropic_api_key: Anthropic API key (optional, not used with default HuggingFace embeddings)
+            anthropic_api_key: Anthropic API key (optional, not used for harvesting which uses HuggingFace embeddings)
         """
         self.base_url = "https://nf-co.re/docs/guidelines/components"
         self.docs_dir = "nfcore_docs"
         
-        # Store API keys but only for compatibility - not used for harvesting
-        # which uses HuggingFace embeddings by default
-        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+        # Store API key for compatibility - not used for harvesting which uses HuggingFace embeddings
         self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
         
         os.makedirs(self.docs_dir, exist_ok=True)

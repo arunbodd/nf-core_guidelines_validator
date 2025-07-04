@@ -14,24 +14,20 @@ from langchain_community.vectorstores import FAISS
 class ExcelValidator:
     """Excel-based validator for nf-core pipeline components"""
     
-    def __init__(self, excel_path: str, vectorstore_path: str = None, openai_api_key: str = None,
-                 model_provider: str = "openai", anthropic_api_key: str = None):
-        """Initialize the Excel-based validator
+    def __init__(self, excel_path: str, vectorstore_path: str = None, anthropic_api_key: str = None):
+        """Initialize the Excel-based validator with Anthropic Claude 4 Opus
         
         Args:
             excel_path: Path to the Excel template
             vectorstore_path: Path to the vector store (optional)
-            openai_api_key: OpenAI API key (required only if model_provider is 'openai')
-            model_provider: Which model provider to use ('openai' or 'anthropic')
-            anthropic_api_key: Anthropic API key for Claude models (required only if model_provider is 'anthropic')
+            anthropic_api_key: Anthropic API key for Claude 4 Opus
         """
         self.excel_path = os.path.abspath(excel_path)
         self.vectorstore_path = vectorstore_path
-        self.model_provider = model_provider.lower()
-        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
         self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
-        self.llm = None
-        self.anthropic_client = None
+        
+        if not self.anthropic_api_key:
+            raise ValueError("Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
         
         # Check that the Excel file exists
         if not os.path.exists(self.excel_path):
@@ -40,28 +36,10 @@ class ExcelValidator:
         # Load Excel template
         self.requirements_df = self._load_excel_template()
         
-        # Set up LLM for validation - only when needed based on provider
-        if self.model_provider == "openai":
-            if not self.openai_api_key:
-                raise ValueError("OpenAI API key is required for OpenAI models. Set OPENAI_API_KEY environment variable or pass it directly.")
-                
-            # Import only when needed
-            from langchain.chat_models import ChatOpenAI
-            self.llm = ChatOpenAI(
-                temperature=0, 
-                model="gpt-4",
-                openai_api_key=self.openai_api_key
-            )
-        elif self.model_provider == "anthropic":
-            if not self.anthropic_api_key:
-                raise ValueError("Anthropic API key is required for Claude models. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
-                
-            # Import only when needed
-            import anthropic
-            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
-            self.anthropic_model = "claude-3-7-sonnet-20250219"
-        else:
-            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai' or 'anthropic'")
+        # Set up Anthropic client
+        import anthropic
+        self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+        self.anthropic_model = "claude-opus-4-20250514"
             
         # Load vector store if it exists - always use HuggingFace embeddings
         if os.path.exists(self.vectorstore_path):

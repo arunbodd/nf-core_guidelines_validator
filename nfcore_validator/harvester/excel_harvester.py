@@ -13,19 +13,16 @@ from langchain.schema import Document
 class ExcelGuidelinesHarvester:
     """Harvests nf-core guidelines from an Excel template and creates a vector store for retrieval"""
     
-    def __init__(self, excel_path: str, openai_api_key: str = None, anthropic_api_key: str = None):
+    def __init__(self, excel_path: str, anthropic_api_key: str = None):
         """Initialize the harvester
         
         Args:
             excel_path: Path to the Excel template file
-            openai_api_key: OpenAI API key for embeddings (optional, not used with default HuggingFace embeddings)
-            anthropic_api_key: Anthropic API key (optional, not used with default HuggingFace embeddings)
+            anthropic_api_key: Anthropic API key (optional, not used for harvesting which uses HuggingFace embeddings)
         """
         self.excel_path = os.path.abspath(excel_path)
         
-        # Store API keys but only for compatibility - not used for harvesting
-        # which uses HuggingFace embeddings by default
-        self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+        # Store API key for compatibility - not used for harvesting which uses HuggingFace embeddings
         self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
         
         if not os.path.exists(self.excel_path):
@@ -79,6 +76,7 @@ Definition: {row.get('Definition', '')}
             # Create metadata
             metadata = {
                 "source": f"excel_template:{index}",
+                "classification": row.get('Classification', ''),
                 "category": row.get('Category', ''),
                 "subcategory": row.get('Subcategory', '')
             }

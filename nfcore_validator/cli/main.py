@@ -26,13 +26,11 @@ def harvest_command(args):
         print(f"Harvesting nf-core guidelines from Excel template: {args.excel_template}")
         harvester = ExcelGuidelinesHarvester(
             args.excel_template, 
-            openai_api_key=args.openai_api_key,
             anthropic_api_key=args.anthropic_api_key
         )
     else:
         print(f"Harvesting nf-core documentation from website...")
         harvester = NfCoreDocsHarvester(
-            openai_api_key=args.openai_api_key,
             anthropic_api_key=args.anthropic_api_key
         )
     
@@ -49,8 +47,6 @@ def validate_command(args):
     scanner = PipelineScanner(
         args.pipeline_path, 
         args.vectorstore,
-        openai_api_key=args.openai_api_key,
-        model_provider=args.model_provider,
         anthropic_api_key=args.anthropic_api_key,
         excel_template=args.excel_template
     )
@@ -86,8 +82,6 @@ def chat_command(args):
     
     chat = NfCoreDocChat(
         vectorstore_path=args.vectorstore,
-        openai_api_key=args.openai_api_key,
-        model_provider=args.model_provider,
         anthropic_api_key=args.anthropic_api_key
     )
     
@@ -126,18 +120,8 @@ def main():
     # Common arguments
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser.add_argument(
-        "--openai-api-key", 
-        help="OpenAI API key (defaults to OPENAI_API_KEY environment variable)"
-    )
-    parent_parser.add_argument(
-        "--model-provider",
-        choices=["openai", "anthropic"],
-        default="openai",
-        help="Model provider to use (default: openai)"
-    )
-    parent_parser.add_argument(
-        "--anthropic-api-key",
-        help="Anthropic API key for Claude models (defaults to ANTHROPIC_API_KEY environment variable)"
+        "--api-key",
+        help="Anthropic API key for Claude 4 Opus (defaults to ANTHROPIC_API_KEY environment variable)"
     )
     
     # Harvest command
@@ -222,16 +206,14 @@ def main():
         # Check if --output was explicitly provided
         args.output_specified = "--output" in sys.argv
     
-    # Check for required API keys based on model provider
+    # Set anthropic_api_key from --api-key argument or environment
+    args.anthropic_api_key = args.api_key or os.environ.get("ANTHROPIC_API_KEY")
+    
+    # Check for required Anthropic API key
     if args.command == "validate" or args.command == "chat":
-        if args.model_provider == "openai":
-            if not args.openai_api_key and not os.environ.get("OPENAI_API_KEY"):
-                print("Error: OpenAI API key is required. Set OPENAI_API_KEY environment variable or use --openai-api-key.")
-                return 1
-        elif args.model_provider == "anthropic":
-            if not args.anthropic_api_key and not os.environ.get("ANTHROPIC_API_KEY"):
-                print("Error: Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or use --anthropic-api-key.")
-                return 1
+        if not args.anthropic_api_key:
+            print("Error: Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or use --api-key.")
+            return 1
                 
     # No API key checks for harvest command - it uses HuggingFace embeddings by default
     

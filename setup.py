@@ -11,10 +11,15 @@ setup(
     packages=find_packages(),
     install_requires=[
         "langchain>=0.0.267",
-        "openai>=0.27.0",
+        "langchain-community>=0.0.10",
+        "anthropic>=0.25.0",
         "faiss-cpu>=1.7.4",
         "beautifulsoup4>=4.12.0",
         "requests>=2.28.0",
+        "transformers>=4.21.0",
+        "sentence-transformers>=2.2.0",
+        "pandas>=1.5.0",
+        "openpyxl>=3.0.0",
     ],
     entry_points={
         "console_scripts": [

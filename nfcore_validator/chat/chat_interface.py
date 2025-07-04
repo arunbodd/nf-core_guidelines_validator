@@ -14,50 +14,23 @@ from langchain.schema import SystemMessage, HumanMessage, AIMessage
 class NfCoreDocChat:
     """Chat interface for nf-core documentation"""
     
-    def __init__(self, vectorstore_path: str = "nfcore_vectorstore", openai_api_key: str = None,
-                 model_provider: str = "openai", anthropic_api_key: str = None):
-        """Initialize the chat interface
+    def __init__(self, vectorstore_path: str = "nfcore_vectorstore", anthropic_api_key: str = None):
+        """Initialize the chat interface with Anthropic Claude 4 Opus
         
         Args:
             vectorstore_path: Path to the vector store with nf-core documentation
-            openai_api_key: OpenAI API key for LLM (required only if model_provider is 'openai')
-            model_provider: Which model provider to use ('openai' or 'anthropic')
-            anthropic_api_key: Anthropic API key for Claude models (required only if model_provider is 'anthropic')
+            anthropic_api_key: Anthropic API key for Claude 4 Opus
         """
-        self.model_provider = model_provider.lower()
-        self.llm = None
-        self.anthropic_client = None
+        self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
         
-        # Set up the appropriate model based on provider
-        if self.model_provider == "openai":
-            self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
-            
-            if not self.openai_api_key:
-                raise ValueError("OpenAI API key is required for OpenAI models. Set OPENAI_API_KEY environment variable or pass it directly.")
-                
-            # Import only when needed
-            from langchain_community.chat_models import ChatOpenAI
-            self.llm = ChatOpenAI(
-                temperature=0, 
-                model="gpt-4",
-                openai_api_key=self.openai_api_key
-            )
-            
-        elif self.model_provider == "anthropic":
-            self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
-            
-            if not self.anthropic_api_key:
-                raise ValueError("Anthropic API key is required for Claude models. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
-            
-            # Import only when needed
-            import anthropic
-            # Create a direct Anthropic client
-            print("Using direct Anthropic API integration")
-            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
-            self.anthropic_model = "claude-3-7-sonnet-20250219"
-                
-        else:
-            raise ValueError(f"Unsupported model provider: {model_provider}. Choose from 'openai' or 'anthropic'")
+        if not self.anthropic_api_key:
+            raise ValueError("Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or pass it directly.")
+        
+        # Import and initialize Anthropic client
+        import anthropic
+        print("Using Anthropic Claude 4 Opus")
+        self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+        self.anthropic_model = "claude-opus-4-20250514"
         
         # Always use HuggingFace embeddings for vector search
         print(f"Loading vector store from {vectorstore_path} with HuggingFace embeddings")
@@ -134,12 +107,8 @@ Remember that you're helping users create compliant nf-core pipelines."""
         """
         messages.append(HumanMessage(content=query_with_context))
         
-        # Get response
-        if self.model_provider == "anthropic":
-            # Use the custom method for calling the Anthropic API
-            response = self._call_anthropic_api(messages)
-        else:
-            response = self.llm(messages)
+        # Get response from Anthropic Claude 4 Opus
+        response = self._call_anthropic_api(messages)
         
         # Update chat history
         self.chat_history.append(HumanMessage(content=question))
