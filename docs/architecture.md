@@ -11,60 +11,68 @@ graph TD
     classDef apiKey fill:#ffcceb,stroke:#c5c,stroke-width:1px
     classDef noApiKey fill:#ccffcc,stroke:#5c5,stroke-width:1px
     classDef report fill:#d6c3a9,stroke:#862,stroke-width:1px
-    classDef command fill:#c2f0c2,stroke:#282,stroke-width:1px
     classDef interface fill:#d4d4d4,stroke:#555,stroke-width:1px
+    classDef guidelines fill:#e6f3ff,stroke:#0080ff,stroke-width:1px
 
     %% Data Sources
-    W[nf-core Documentation Website] -->|Scrapes| DH[Docs Harvester]
-    E[Excel Template] -->|Loads| EH[Excel Harvester]
+    W["nf-core Documentation Website"] -->|Scrapes| DH["Docs Harvester"]
+    E["Excel Template"] -->|Loads| EH["Excel Harvester"]
     
-    %% Harvesting
-    DH -->|Creates| VS[FAISS Vector Store]
-    EH -->|Creates| VS
-    
-    %% Embedding Options
-    DH -->|Default| HF[HuggingFace Embeddings]
-    %% OpenAI embeddings support preserved but no longer used directly
-    DH -.->|Legacy Support| OE[OpenAI Embeddings]
+    %% Harvesting - Both use HuggingFace Embeddings
+    DH -->|Creates| VS["FAISS Vector Store"]
+    EH -->|Creates| VS2["Excel Vector Store"]
+    DH -->|Uses| HF["HuggingFace Embeddings"]
+    EH -->|Uses| HF
     
     %% Pipeline Component Analysis
-    PS[Pipeline Scanner] -->|Finds| PC[Pipeline Components]
-    PS -->|Uses| V[Validator]
+    PS["Pipeline Scanner"] -->|Finds| PC["Pipeline Components"]
+    PS -->|Chooses Validator| CHOICE{"Excel Template?"}
     
-    %% Validation Types
-    V -->|Option 1| LV[LLM Validator]
-    V -->|Option 2| EV[Excel Validator]
+    %% Validator Selection
+    CHOICE -->|Yes| EV["Excel Validator"]
+    CHOICE -->|No| LV["LLM Validator"]
     
-    %% LLM Provider Options
+    %% LLM Validator Flow
     LV -->|Uses| VS
-    LV -->|OpenAI Option| OA[OpenAI GPT-4]
-    LV -->|Anthropic Option| AC[Anthropic Claude]
+    LV -->|Component Type Detection| CTD["Component Type Detection"]
+    LV -->|Internal Rule Correction| RBC["Rule-Based Correction"]
+    LV -->|Powered by| AC["Anthropic Claude 4 Opus"]
+    
+    %% Excel Validator Flow  
+    EV -->|Uses| VS2
+    EV -->|Gets Requirements from| E
+    EV -->|Powered by| AC
+    
+    %% Component Type Detection (LLM Validator only)
+    CTD -->|Module Guidelines| MG["Module Guidelines"]
+    CTD -->|Workflow Guidelines| WG["Workflow Guidelines"]
+    CTD -->|Config Guidelines| CG["Config Guidelines"]
+    CTD -->|Documentation Guidelines| DG["Documentation Guidelines"]
     
     %% API Key Requirements
-    OA -->|Requires| OAK[OpenAI API Key]
-    AC -->|Requires| AAK[Anthropic API Key]
-    HF -->|No API Key Required| NKR[Local Execution]
+    AC -->|Requires| AAK["Anthropic API Key"]
+    HF -->|No API Key Required| NKR["Local Execution"]
     
     %% Report Generation
-    V -->|Generates| RG[Report Generator]
-    RG -->|Formats| JSON[JSON Report]
-    RG -->|Formats| MD[Markdown Report]
-    RG -->|Formats| XML[XML Report]
+    LV -->|Generates| RG["Report Generator"]
+    EV -->|Generates| RG
+    RG -->|Formats| JSON["JSON Report"]
+    RG -->|Formats| MD["Markdown Report"]
+    RG -->|Formats| XML["XML Report"]
     
     %% Chat Interface
-    CI[Chat Interface] -->|Queries| VS
-    CI -->|OpenAI Option| OA
-    CI -->|Anthropic Option| AC
+    CI["Chat Interface"] -->|Queries| VS
+    CI -->|Powered by| AC
     
-    %% Component Grouping
-    subgraph Pipeline Components
-        PC1[Modules]
-        PC2[Workflows]
-        PC3[Subworkflows]
-        PC4[Configs]
-        PC5[Main Workflow]
-        PC6[Pipeline Files]
-        PC7[Test Data]
+    %% Component Types Found
+    subgraph "Pipeline Components"
+        PC1["Modules (*.nf)"]
+        PC2["Workflows (*.nf)"]
+        PC3["Subworkflows (*.nf)"]
+        PC4["Configs (*.config)"]
+        PC5["Main Workflow (main.nf)"]
+        PC6["Documentation (*.md)"]
+        PC7["Schema (*.json)"]
     end
     
     PC --> PC1
@@ -75,52 +83,34 @@ graph TD
     PC --> PC6
     PC --> PC7
     
-    %% Command Dependencies
-    subgraph Commands
-        CMD1[harvest (No API Key Required)]
-        CMD2[validate (API Key Required)]
-        CMD3[chat (API Key Required)]
+    %% CLI Commands
+    subgraph "CLI Commands"
+        CMD1["harvest - No API Key Required"]
+        CMD2["validate - Anthropic API Key Required"]
+        CMD3["chat - Anthropic API Key Required"]
     end
     
     %% CLI Interface
-    CLI[Command Line Interface] -->|harvest| DH
+    CLI["Command Line Interface"] -->|harvest| DH
+    CLI -->|harvest| EH
     CLI -->|validate| PS
     CLI -->|chat| CI
     
-    %% Apply styles
-    W:::dataSources
-    E:::dataSources
-    DH:::harvester
-    EH:::harvester
-    VS:::vectorStore
-    HF:::embeddings
-    OE:::embeddings
-    PS:::validator
-    V:::validator
-    LV:::validator
-    EV:::validator
-    OA:::llmModel
-    AC:::llmModel
-    OAK:::apiKey
-    AAK:::apiKey
-    NKR:::noApiKey
-    RG:::report
-    JSON:::report
-    MD:::report
-    XML:::report
-    CI:::interface
-    CLI:::interface
-    PC:::components
-    PC1:::components
-    PC2:::components
-    PC3:::components
-    PC4:::components
-    PC5:::components
-    PC6:::components
-    PC7:::components
-    CMD1:::noApiKey
-    CMD2:::apiKey
-    CMD3:::apiKey
+    %% Apply Styling
+    class W,E dataSources
+    class DH,EH harvester
+    class VS,VS2 vectorStore
+    class HF embeddings
+    class PS,LV,EV validator
+    class AC llmModel
+    class AAK apiKey
+    class NKR,CMD1 noApiKey
+    class CMD2,CMD3 apiKey
+    class RG report
+    class JSON,MD,XML report
+    class CI,CLI interface
+    class PC,PC1,PC2,PC3,PC4,PC5,PC6,PC7 components
+    class MG,WG,CG,DG guidelines
 ```
 
 *Note: To view this diagram, you need a Markdown viewer that supports Mermaid diagrams, such as GitHub or VS Code with the Mermaid extension.*

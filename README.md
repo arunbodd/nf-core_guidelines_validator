@@ -11,8 +11,8 @@ An AI-powered agent for validating nf-core pipeline compliance. This tool analyz
 - **AI-Powered**: Leverages large language models to understand complex requirements and provide context-aware suggestions
 - **Interactive Chat**: Query the nf-core documentation directly with natural language questions
 - **Categorized Results**: View validation results and chat responses organized by documentation category
-- **Multi-Model Support**: Supports OpenAI GPT-4 and Anthropic Claude 3.7 Sonnet models
-- **No OpenAI Dependency**: Uses HuggingFace embeddings by default with no API key requirement for harvesting
+- **Anthropic Claude 4 Opus**: Powered by the latest Claude 4 Opus model for superior validation accuracy
+- **No API Key for Harvesting**: Uses HuggingFace embeddings with no API key requirement for harvesting
 - **Excel Template Option**: Can use Excel templates with structured guidelines as an alternative to web-based guidelines
 - **Multiple Report Formats**: Generate reports in JSON, Markdown, and XML formats
 
@@ -21,7 +21,7 @@ An AI-powered agent for validating nf-core pipeline compliance. This tool analyz
 ### Prerequisites
 
 - Python 3.8 or higher
-- Either an OpenAI API key OR an Anthropic API key (required only for validate and chat commands, not for harvest)
+- An Anthropic API key (required only for validate and chat commands, not for harvest)
 
 ### Install from source
 
@@ -45,13 +45,8 @@ Before validating pipelines, you need to harvest the nf-core documentation. You 
 Harvest guidelines directly from the nf-core website:
 
 ```bash
-# Using HuggingFace embeddings (default, no API key required)
+# Using HuggingFace embeddings (no API key required)
 nfcore-validator harvest
-
-# The following still works but the OpenAI/Anthropic keys are not used for harvesting
-# API keys are only stored for compatibility with later commands
-nfcore-validator harvest --openai-api-key "your-api-key"
-nfcore-validator harvest --anthropic-api-key "your-anthropic-api-key"
 ```
 
 #### Option B: Excel Template
@@ -77,17 +72,11 @@ Either method will create a vector store of nf-core guidelines in the current di
 ### 2. Validate a Pipeline
 
 ```bash
-# Validate a pipeline (default: OpenAI GPT-4)
-# API key required for this command
-nfcore-validator validate /path/to/your/pipeline --format markdown --openai-api-key $OPENAI_API_KEY
-
-# Validate using Anthropic Claude 3.7 Sonnet
-# API key required for this command
-nfcore-validator validate /path/to/your/pipeline --model-provider anthropic --anthropic-api-key $ANTHROPIC_API_KEY --format markdown
+# Validate a pipeline using Anthropic Claude 4 Opus
+nfcore-validator validate /path/to/your/pipeline --format markdown --api-key $ANTHROPIC_API_KEY
 
 # Validate using Excel template as the requirements source
-# API key still required based on model provider
-nfcore-validator validate /path/to/your/pipeline --excel-template path/to/guidelines.xlsx --format markdown --openai-api-key $OPENAI_API_KEY
+nfcore-validator validate /path/to/your/pipeline --excel-template path/to/guidelines.xlsx --format markdown --api-key $ANTHROPIC_API_KEY
 ```
 
 This will:
@@ -100,17 +89,14 @@ This will:
 You can also directly query the nf-core documentation using natural language:
 
 ```bash
-# Start the chat interface with OpenAI (API key required)
-nfcore-validator chat --openai-api-key $OPENAI_API_KEY
+# Start the chat interface with Anthropic Claude 4 Opus
+nfcore-validator chat --api-key $ANTHROPIC_API_KEY
 
-# Start the chat interface with Anthropic Claude (API key required)
-nfcore-validator chat --model-provider anthropic --anthropic-api-key $ANTHROPIC_API_KEY
-
-# Show sources for answers (works with both OpenAI and Anthropic)
-nfcore-validator chat --show-sources --openai-api-key $OPENAI_API_KEY
+# Show sources for answers
+nfcore-validator chat --show-sources --api-key $ANTHROPIC_API_KEY
 
 # Increase context size for more comprehensive answers
-nfcore-validator chat --context-size 15 --openai-api-key $OPENAI_API_KEY
+nfcore-validator chat --context-size 15 --api-key $ANTHROPIC_API_KEY
 ```
 
 The `--show-sources` flag displays the source documents used to generate the answer, organized by documentation category.
@@ -162,8 +148,8 @@ Example markdown report:
 # No API key required for harvest
 nfcore-validator harvest --output /path/to/vectorstore
 
-# API key required for validate based on model provider
-nfcore-validator validate /path/to/pipeline --vectorstore /path/to/vectorstore --openai-api-key $OPENAI_API_KEY
+# Anthropic API key required for validate
+nfcore-validator validate /path/to/pipeline --vectorstore /path/to/vectorstore --api-key $ANTHROPIC_API_KEY
 ```
 
 ### Rate Limit Handling
@@ -176,7 +162,7 @@ The validator automatically handles API rate limits by:
 You can also reduce parallelism to further avoid rate limits:
 
 ```bash
-python -m nfcore_validator.cli.main validate /path/to/pipeline --max-workers 2 --openai-api-key $OPENAI_API_KEY
+python -m nfcore_validator.cli.main validate /path/to/pipeline --max-workers 2 --api-key $ANTHROPIC_API_KEY
 ```
 
 ### Categorized Chat
@@ -184,8 +170,8 @@ python -m nfcore_validator.cli.main validate /path/to/pipeline --max-workers 2 -
 The chat interface categorizes information by documentation section:
 
 ```bash
-# API key required based on model provider
-nfcore-validator chat --show-sources --openai-api-key $OPENAI_API_KEY
+# Anthropic API key required
+nfcore-validator chat --show-sources --api-key $ANTHROPIC_API_KEY
 ```
 
 This will display sources grouped by categories like:
@@ -205,9 +191,9 @@ The nf-core validator consists of several components working together:
 5. **Chat Interface**: Interactive Q&A system for nf-core documentation
 6. **Report Generator**: Creates formatted reports in JSON, Markdown, and XML
 
-For each component, you can choose between:
-- OpenAI's GPT-4 or Anthropic's Claude 3.7 Sonnet for LLM-based analysis (validate/chat)
-- HuggingFace embeddings (default) for harvesting documentation and creating vector embeddings
+The system uses:
+- Anthropic's Claude 4 Opus for LLM-based analysis (validate/chat)
+- HuggingFace embeddings for harvesting documentation and creating vector embeddings
 
 For detailed technical information, see [How It Works](docs/how_it_works.md).
 

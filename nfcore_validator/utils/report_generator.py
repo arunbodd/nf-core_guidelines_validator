@@ -34,6 +34,81 @@ class ReportGenerator:
         with open(markdown_path, 'w') as f:
             f.write(self._generate_markdown(report))
             
+    def _generate_excel_table_markdown(self, data: Dict[str, Any]) -> str:
+        """Generate Excel-style table report for pipeline-wide validation"""
+        md = []
+        
+        # Title and summary
+        md.append(f"# nf-core Pipeline Compliance Report")
+        md.append(f"**Pipeline:** {data.get('pipeline_path', 'Unknown')}")
+        md.append(f"**Generated:** {data.get('timestamp', 'Unknown')}")
+        md.append("")
+        
+        # Overall summary
+        summary = data.get('summary', {})
+        compliance_score = summary.get('compliance_score', 0)
+        total_requirements = summary.get('total_requirements', 0)
+        passed_requirements = summary.get('passed_requirements', 0)
+        
+        md.append("## Summary")
+        md.append(f"- **Overall Compliance Score:** {compliance_score:.1f}%")
+        md.append(f"- **Requirements Met:** {passed_requirements}/{total_requirements}")
+        md.append(f"- **Requirements Failed:** {total_requirements - passed_requirements}/{total_requirements}")
+        md.append("")
+        
+        # Requirements table
+        md.append("## Requirements Validation Results")
+        md.append("")
+        
+        # Get results from the single component (pipeline-wide validation)
+        components = data.get('components', [])
+        if components:
+            results = components[0].get('results', [])
+            
+            if results:
+                # Table header
+                md.append("| # | Requirement | Met | Score | Reason | Evidence |")
+                md.append("|---|-------------|-----|-------|--------|----------|")
+                
+                # Table rows
+                for i, result in enumerate(results, 1):
+                    req_id = result.get('id', 'Unknown')[:50]  # Truncate long IDs
+                    description = result.get('description', 'No description')[:100]  # Truncate long descriptions
+                    meets_req = result.get('meets_requirement', False)
+                    score = result.get('score', 0)
+                    reason = result.get('reason', '')[:80]  # Truncate long reasons
+                    evidence = result.get('evidence', '')[:80]  # Truncate long evidence
+                    
+                    # Format boolean as Yes/No
+                    meets_display = "✅ Yes" if meets_req else "❌ No"
+                    
+                    # Escape pipe characters in content
+                    req_id = req_id.replace('|', '\|')
+                    description = description.replace('|', '\|')
+                    reason = reason.replace('|', '\|')
+                    evidence = evidence.replace('|', '\|')
+                    
+                    md.append(f"| {i} | {description} | {meets_display} | {score} | {reason} | {evidence} |")
+                
+                md.append("")
+                
+                # Summary statistics
+                met_count = sum(1 for r in results if r.get('meets_requirement', False))
+                not_met_count = len(results) - met_count
+                
+                md.append("## Detailed Statistics")
+                md.append(f"- **Total Requirements Evaluated:** {len(results)}")
+                md.append(f"- **Requirements Met:** {met_count}")
+                md.append(f"- **Requirements Not Met:** {not_met_count}")
+                md.append(f"- **Compliance Percentage:** {(met_count/len(results)*100):.1f}%")
+                
+            else:
+                md.append("No validation results found.")
+        else:
+            md.append("No components found for validation.")
+        
+        return "\n".join(md)
+
     def _generate_markdown(self, report: Dict[str, Any]) -> str:
         """Generate Markdown report
         
@@ -91,7 +166,7 @@ class ReportGenerator:
         # Group failed requirements by classification/category/subcategory
         classification_failures = {}
         for component in components:
-            component_path = component.get('path', 'Unknown')
+            component_path = component.get('component_path', 'Unknown')
             for req in component.get('requirements', []):
                 if req.get('status') == 'failed':
                     classification = req.get('classification', 'Unknown')
@@ -141,7 +216,15 @@ class ReportGenerator:
             total_score = 0
             for component in components_list:
                 component_summary = component.get('summary', {})
-                total_score += component_summary.get('compliance_score', 0)
+                if component_summary:
+                    # Old format with summary object
+                    total_score += component_summary.get('compliance_score', 0)
+                else:
+                    # New format with direct fields
+                    passed_count = component.get('passed', 0)
+                    total_count = component.get('total', 0)
+                    compliance_score = (passed_count / total_count * 100) if total_count > 0 else 0
+                    total_score += compliance_score
             
             avg_score = total_score / len(components_list) if components_list else 0
             md.append(f"| {component_type} | {len(components_list)} | {avg_score:.2f}% |\n")
@@ -169,26 +252,49 @@ class ReportGenerator:
             md.append(f"### {component_type.title()} Components\n")
             
             # Sort components by compliance score (worst first)
+            def get_compliance_score(c):
+                summary = c.get('summary', {})
+                if summary:
+                    return summary.get('compliance_score', 0)
+                else:
+                    passed = c.get('passed', 0)
+                    total = c.get('total', 0)
+                    return (passed / total * 100) if total > 0 else 0
+            
             sorted_components = sorted(
                 components_list, 
-                key=lambda c: c.get('summary', {}).get('compliance_score', 0)
+                key=get_compliance_score
             )
             
             for component in sorted_components:
-                component_path = component.get('path', 'Unknown')
+                component_path = component.get('component_path', 'Unknown')
+                
+                # Handle both summary format and direct fields format
                 component_summary = component.get('summary', {})
+                if component_summary:
+                    # Old format with summary object
+                    compliance_score = component_summary.get('compliance_score', 0)
+                    passed_count = component_summary.get('passed', 0)
+                    failed_count = component_summary.get('failed', 0)
+                else:
+                    # New format with direct fields
+                    passed_count = component.get('passed', 0)
+                    total_count = component.get('total', 0)
+                    failed_count = total_count - passed_count
+                    compliance_score = (passed_count / total_count * 100) if total_count > 0 else 0
                 
                 md.append(f"#### {os.path.basename(component_path)}\n")
                 md.append(f"- **Path:** `{component_path}`\n")
-                md.append(f"- **Compliance Score:** {component_summary.get('compliance_score', 0)}%\n")
-                md.append(f"- **Passed:** {component_summary.get('passed', 0)} requirements\n")
-                md.append(f"- **Failed:** {component_summary.get('failed', 0)} requirements\n")
+                md.append(f"- **Compliance Score:** {compliance_score:.1f}%\n")
+                md.append(f"- **Passed:** {passed_count} requirements\n")
+                md.append(f"- **Failed:** {failed_count} requirements\n")
                 
-                # Requirements grouped by status
+                # Requirements grouped by status - handle both 'requirements' and 'results'
                 passed_reqs = []
                 failed_reqs = []
                 
-                for req in component.get('requirements', []):
+                requirements = component.get('requirements', []) or component.get('results', [])
+                for req in requirements:
                     if req.get('status') == 'passed':
                         passed_reqs.append(req)
                     else:
@@ -279,9 +385,20 @@ class ReportGenerator:
         if output_path is None:
             pipeline_name = os.path.basename(self.report.get('pipeline_path', 'unknown'))
             output_path = f"{pipeline_name}_compliance_report.md"
-            
+        
+        # Check if this is pipeline-wide validation (single component with requirements from vectorstore)
+        components = self.report.get('components', [])
+        is_pipeline_wide = (len(components) == 1 and 
+                           len(components[0].get('results', [])) > 5 and  # More than 5 requirements suggests pipeline-wide
+                           components[0].get('component_path') == self.report.get('pipeline_path'))  # Component path matches pipeline path
+        
         with open(output_path, 'w') as f:
-            f.write(self._generate_markdown(self.report))
+            if is_pipeline_wide:
+                # Use Excel table format for pipeline-wide validation
+                f.write(self._generate_excel_table_markdown(self.report))
+            else:
+                # Use traditional component-wise format
+                f.write(self._generate_markdown(self.report))
             
         return output_path
 

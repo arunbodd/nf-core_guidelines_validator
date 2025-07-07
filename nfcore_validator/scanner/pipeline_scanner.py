@@ -12,37 +12,28 @@ from datetime import datetime
 from pathlib import Path
 
 from ..validator.llm_validator import NfCoreValidator
-from ..validator.excel_validator import ExcelValidator
 
 class PipelineScanner:
     """Scanner for nf-core pipeline compliance"""
     
     def __init__(self, pipeline_path: str, vectorstore_path: str = "nfcore_vectorstore", 
                  anthropic_api_key: str = None, excel_template: str = None):
-        """Initialize the scanner with Anthropic Claude 4 Opus
+        """Initialize the scanner with Anthropic Claude 3.5 Sonnet
         
         Args:
             pipeline_path: Path to the pipeline to scan
             vectorstore_path: Path to the vector store with nf-core documentation
-            anthropic_api_key: Anthropic API key for Claude 4 Opus
-            excel_template: Path to Excel template with requirements (optional)
+            anthropic_api_key: Anthropic API key for Claude 3.5 Sonnet
         """
         self.pipeline_path = os.path.abspath(pipeline_path)
         
-        # Set up the appropriate validator based on whether Excel template is provided
-        if excel_template:
-            self.validator = ExcelValidator(
-                excel_path=excel_template,
-                vectorstore_path=vectorstore_path,
-                anthropic_api_key=anthropic_api_key
-            )
-            print(f"Using Excel-based validator with template: {excel_template}")
-        else:
-            self.validator = NfCoreValidator(
-                vectorstore_path=vectorstore_path, 
-                anthropic_api_key=anthropic_api_key
-            )
-            print("Using LLM-based validator with Anthropic Claude 4 Opus")
+        # Always use NfCoreValidator with vectorstore for RAG-based validation
+        # Excel templates should be converted to vectorstore using harvest command first
+        self.validator = NfCoreValidator(
+            vectorstore_path=vectorstore_path, 
+            anthropic_api_key=anthropic_api_key
+        )
+        print("Using LLM-based validator with Anthropic Claude 3.5 Sonnet")
         
         if not os.path.exists(self.pipeline_path):
             raise ValueError(f"Pipeline path does not exist: {self.pipeline_path}")
@@ -245,127 +236,39 @@ class PipelineScanner:
         }
     
     def scan_pipeline(self, max_workers: int = 4) -> Dict[str, Any]:
-        """Scan the pipeline for compliance
+        """Scan the pipeline for compliance against all requirements in vectorstore
         
         Args:
-            max_workers: Maximum number of parallel workers
+            max_workers: Maximum number of parallel workers (not used in new approach)
             
         Returns:
             Dictionary with scan results
         """
-        # First, validate overall pipeline structure
-        pipeline_structure_result = self.validate_pipeline_structure()
+        print(f"\n🚀 Starting pipeline-wide validation against all requirements")
+        print(f"Pipeline path: {self.pipeline_path}")
         
-        components = self.find_components()
-        print(f"Found {len(components)} components to validate")
+        # Use the new pipeline-wide validation method
+        validation_result = self.validator.validate_pipeline_against_requirements(self.pipeline_path)
         
-        # Debug: Show component types being detected
-        print("\n🔍 Component type analysis:")
-        component_types = {}
-        for component in components:
-            if hasattr(self.validator, '_determine_component_type'):
-                comp_type = self.validator._determine_component_type(component)
-                component_types[comp_type] = component_types.get(comp_type, 0) + 1
-                print(f"  {component} -> {comp_type}")
+        if 'error' in validation_result:
+            return {
+                'pipeline_path': self.pipeline_path,
+                'error': validation_result['error'],
+                'compliance_score': 0,
+                'total_requirements': 0,
+                'requirements_met': 0,
+                'results': []
+            }
         
-        print(f"\n📊 Component type summary:")
-        for comp_type, count in component_types.items():
-            print(f"  {comp_type}: {count}")
+        # Extract results
+        total_requirements = validation_result.get('total_requirements', 0)
+        requirements_met = validation_result.get('requirements_met', 0)
+        compliance_score = validation_result.get('compliance_score', 0)
+        results = validation_result.get('results', [])
         
-        results = []
-        total_requirements = 0
-        passed_requirements = 0
-        
-        # Process components with rate limiting
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Schedule all component validation tasks at once
-            future_to_component = {executor.submit(self.validator.validate_component, component): component for component in components}
-            for future in as_completed(future_to_component):
-                component = future_to_component[future]
-                try:
-                    result = future.result()
-                    results.append(result)
-                    
-                    # Update counters
-                    if "requirements" in result:
-                        for req in result["requirements"]:
-                            total_requirements += 1
-                            if req.get("status") == "passed":
-                                passed_requirements += 1
-                                
-                except Exception as e:
-                    error_msg = str(e)
-                    print(f"Error processing {component}: {error_msg}")
-                    
-                    # If rate limited, wait and retry
-                    if "Rate limit reached" in error_msg:
-                        wait_time = 15  # Default wait time
-                        # Try to extract wait time from error message
-                        match = re.search(r"Please try again in (\d+\.\d+)s", error_msg)
-                        if match:
-                            wait_time = float(match.group(1)) + 1  # Add a buffer
-                            
-                        print(f"Rate limited. Waiting {wait_time} seconds before continuing...")
-                        time.sleep(wait_time)
-                        
-                        # Retry this component
-                        try:
-                            result = self.validator.validate_component(component)
-                            results.append(result)
-                        except Exception as retry_e:
-                            print(f"Retry failed for {component}: {str(retry_e)}")
-                            results.append({
-                                "error": str(retry_e),
-                                "path": component
-                            })
-                    else:
-                        results.append({
-                            "error": error_msg,
-                            "path": component
-                        })
-                
-                print(f"Processed component: {component}")
-                
-                # Add a small delay to avoid rate limiting
-                time.sleep(0.5)
-        
-        # Calculate overall compliance score
-        # Include pipeline structure validation in results
-        all_results = [pipeline_structure_result] + results
-        
-        if all_results:
-            # Calculate compliance based on individual component scores
-            total_score = 0
-            components_with_scores = 0
-            
-            for result in all_results:
-                # Get compliance score from component summary
-                component_summary = result.get('summary', {})
-                component_score = component_summary.get('compliance_score', 0)
-                
-                # Only count components that actually have requirements
-                if 'requirements' in result and result['requirements']:
-                    total_score += component_score
-                    components_with_scores += 1
-            
-            # Calculate overall compliance as average of component scores
-            overall_compliance = total_score / components_with_scores if components_with_scores > 0 else 0.0
-            
-            # Calculate additional summary statistics
-            total_requirements = 0
-            passed_requirements = 0
-            
-            for result in all_results:
-                if 'requirements' in result:
-                    reqs = result['requirements']
-                    total_requirements += len(reqs)
-                    passed_requirements += sum(1 for req in reqs if req.get('status') == 'passed')
-        else:
-            overall_compliance = 0.0
-            total_requirements = 0
-            passed_requirements = 0
-        
-        print(f"\nValidation completed. Overall compliance score: {overall_compliance:.2f}%")
+        print(f"\n✅ Validation complete!")
+        print(f"📊 Requirements met: {requirements_met}/{total_requirements}")
+        print(f"🎯 Compliance score: {compliance_score:.1f}%")
         
         # Print usage summary if using LLM validator
         if hasattr(self.validator, 'print_usage_summary'):
@@ -375,15 +278,19 @@ class PipelineScanner:
         return {
             "pipeline_path": self.pipeline_path,
             "summary": {
-                "total_components": len(all_results),
-                "compliance_score": overall_compliance,
+                "total_components": 1,  # Single pipeline validation
+                "compliance_score": compliance_score,
                 "total_requirements": total_requirements,
-                "passed_requirements": passed_requirements
+                "passed_requirements": requirements_met
             },
-            "components": all_results,  # Include pipeline structure + component results
-            "overall_compliance_score": overall_compliance,  # Keep for backward compatibility
-            "total_components": len(all_results),  # Keep for backward compatibility
-            "results": all_results,  # Keep for backward compatibility
+            "components": [{
+                "component_path": self.pipeline_path,
+                "passed": requirements_met,
+                "total": total_requirements,
+                "results": results
+            }],
+            "overall_compliance_score": compliance_score,
+            "total_components": 1,
             "timestamp": datetime.now().isoformat()
         }
         

@@ -1,0 +1,165 @@
+{
+  "pipeline_path": "/Users/arunbodd/Documents/Work/nf-core_guidelines_validator",
+  "summary": {
+    "total_components": 1,
+    "compliance_score": 0.0,
+    "total_requirements": 18,
+    "passed_requirements": 0
+  },
+  "components": [
+    {
+      "component_path": "/Users/arunbodd/Documents/Work/nf-core_guidelines_validator",
+      "passed": 0,
+      "total": 18,
+      "results": [
+        {
+          "id": "Category: Module Subcategory: Resource requirement",
+          "description": "Category: Module Subcategory: Resource requirements Definition: An appropriate resource label must be provided for the module as listed in the nf-core pipeline template e.g. process_single, process_lo",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. It does not contain any Nextflow modules or processes that would require resource labels.",
+          "evidence": "The directory structure shows a Python package (nfcore_validator) with components for validation, scanning, and reporting, but no Nextflow workflow files, modules directory, or process definitions where resource labels would be applied."
+        },
+        {
+          "id": "Category: Workflow Subcategory: Documentation Defi",
+          "description": "Category: Workflow Subcategory: Documentation Definition: Publication credit: Pipeline publications should acknowledge the nf-core community.",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. The requirement about acknowledging nf-core community in publications applies to actual nf-core pipelines, not to validation tools.",
+          "evidence": "The repository structure shows this is 'nf-core_guidelines_validator' with Python modules for validation (validator/, scanner/, harvester/), not a Nextflow pipeline with workflows and processes."
+        },
+        {
+          "id": "Category: Workflow Subcategory: General Definition",
+          "description": "Category: Workflow Subcategory: General Definition: Use the template: All nf-core pipelines must be built using the nf-core template and pipeline initialization with nf-core create (nf-core/tools vers",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validation tool for nf-core pipelines. It lacks the standard nf-core pipeline structure created by 'nf-core create'.",
+          "evidence": "The directory structure shows a Python package (nfcore_validator) with modules for validation, scanning, and compliance checking rather than the expected Nextflow workflow files, modules directory, and nf-core template structure."
+        },
+        {
+          "id": "Category: Workflow Subcategory: Testing Definition",
+          "description": "Category: Workflow Subcategory: Testing Definition: Pass lint tests: The pipeline must not have any undocumented failures in the?nf-core lint?tests.",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. It lacks the essential structure and files required for an nf-core pipeline that would be subject to lint tests.",
+          "evidence": "The directory structure shows 'nfcore_validator' which is a validation tool, not a pipeline. Missing required nf-core pipeline files like main.nf, nextflow.config, modules/, workflows/, and no evidence of lint test results or CI configuration."
+        },
+        {
+          "id": "Category: Subworkflow Subcategory: Testing Definit",
+          "description": "Category: Subworkflow Subcategory: Testing Definition: All output channels should be present in the nf-test snapshot file, or at a minimum, it must be verified that the files exist.",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. It lacks the required subworkflow structure and nf-test files.",
+          "evidence": "The directory structure shows a Python package (nfcore_validator) with no subworkflows/, tests/, or any .nf-test files. This appears to be a compliance checking tool, not an actual nf-core pipeline."
+        },
+        {
+          "id": "Category: Test Data Subcategory: Test Data Definit",
+          "description": "Category: Test Data Subcategory: Test Data Definition: Test data files must have an entry in the nf-core/test-datasets repo README",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather an nf-core validator tool. The requirement about test data files having entries in the nf-core/test-datasets repo README applies to nf-core pipelines, not to validation tools.",
+          "evidence": "The repository structure shows this is 'nf-core_guidelines_validator' with directories like 'nfcore_validator/', 'validator/', 'harvester/', etc. There are no pipeline-specific directories like 'workflows/', 'modules/', or test data directories that would contain test files needing documentation in the nf-core/test-datasets repo."
+        },
+        {
+          "id": "Category: Subworkflow Subcategory: I/O options Def",
+          "description": "Category: Subworkflow Subcategory: I/O options Definition: Input channel declarations must be defined for all possible input files that will be required by the subworkflow (i.e. both required and opti",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a pipeline validation tool. The structure shows a Python package for validating nf-core pipelines, not an actual Nextflow pipeline with subworkflows.",
+          "evidence": "The directory structure contains Python files (*.py), setup.py, and package directories (nfcore_validator/) rather than Nextflow workflow files (.nf), subworkflows directory, or take blocks that would contain input channel declarations."
+        },
+        {
+          "id": "Category: Module Subcategory: Software requirement",
+          "description": "Category: Module Subcategory: Software requirements Definition: Software requirements should be declared within the module file using the Nextflow container directive",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "Validation error: Expecting value: line 1 column 1 (char 0)",
+          "evidence": ""
+        },
+        {
+          "id": "Category: Subworkflow Subcategory: General Definit",
+          "description": "Category: Subworkflow Subcategory: General Definition: Subworkflow must contain at least two modules",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "No subworkflows directory or subworkflow files are present in the pipeline structure",
+          "evidence": "The pipeline structure shows no 'subworkflows/' directory, no '.nf' files that would contain subworkflow definitions, and no evidence of any modules being organized into subworkflows"
+        },
+        {
+          "id": "Category: Module Subcategory: General Definition: ",
+          "description": "Category: Module Subcategory: General Definition: Modules should be stored in the modules dir, and local modules should follow the same dir structure and naming conventions as nf-core modules",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "The pipeline does not contain a 'modules' directory at all, which is required for storing both nf-core and local modules",
+          "evidence": "The pipeline structure shows no 'modules' directory at the root level or anywhere in the project. The project appears to be an nf-core validator tool rather than an nf-core pipeline, as evidenced by directories like 'nfcore_validator/', 'docs/', and files like 'NF-CORE_PH-CORE-guidelines.xlsx'"
+        },
+        {
+          "id": "Category: Subworkflow Subcategory: Documentation D",
+          "description": "Category: Subworkflow Subcategory: Documentation Definition: Each input and output channel structure should also be described in the meta.yml in the description entry.",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "The pipeline structure does not contain any subworkflows directory or meta.yml files that would document input and output channel structures",
+          "evidence": "No 'subworkflows/' directory found in the pipeline structure, and no 'meta.yml' files are present anywhere in the directory tree"
+        },
+        {
+          "id": "Category: Module Subcategory: I/O options Definiti",
+          "description": "Category: Module Subcategory: I/O options Definition: Input channel val declarations should be defined for all mandatory non-file inputs that are essential for the functioning of the tool (e.g. parame",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "Validation error: Expecting value: line 1 column 1 (char 0)",
+          "evidence": ""
+        },
+        {
+          "id": "Category: Subworkflow Subcategory: Naming conventi",
+          "description": "Category: Subworkflow Subcategory: Naming conventions Definition: All parameter names must follow the snake_case convention",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "Cannot verify parameter naming conventions without access to actual subworkflow files containing parameter definitions",
+          "evidence": "The provided structure only shows directory and file names, not the content of subworkflow files where parameters would be defined. No .nf files or subworkflow definitions are visible in the structure."
+        },
+        {
+          "id": "Category: Module Subcategory: Naming conventions D",
+          "description": "Category: Module Subcategory: Naming conventions Definition: Directory structure for the module name must be all lowercase, and without punctuation, e.g. modules/nf-core/bwa/mem/. The name of the soft",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "The pipeline structure does not contain any modules following the nf-core module directory structure pattern (modules/nf-core/software/tool/)",
+          "evidence": "No 'modules' directory found in the pipeline structure, and no subdirectories following the required lowercase naming convention for nf-core modules"
+        },
+        {
+          "id": "Category: Subworkflow Subcategory: Parameters Defi",
+          "description": "Category: Subworkflow Subcategory: Parameters Definition: Named params defined in the parent workflow must not be assumed to be passed to the subworkflow to allow developers to call their parameters w",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. It does not contain any Nextflow workflows or subworkflows to evaluate parameter passing.",
+          "evidence": "The structure shows a Python package (nfcore_validator) with modules for validation, scanning, and harvesting. No .nf files, workflows/, or subworkflows/ directories are present that would contain Nextflow code."
+        },
+        {
+          "id": "Category: Module Subcategory: Documentation Defini",
+          "description": "Category: Module Subcategory: Documentation Definition: Input entries should be marked as Mandatory or Optional",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This appears to be a pipeline validation tool, not an nf-core pipeline with modules. No module documentation files with input parameter definitions were found.",
+          "evidence": "The structure shows a Python package for validating nf-core pipelines (nfcore_validator) rather than an actual nf-core pipeline with modules that would contain documentation marking inputs as Mandatory or Optional."
+        },
+        {
+          "id": "Category: Module Subcategory: Testing Definition: ",
+          "description": "Category: Module Subcategory: Testing Definition: Testing data for custom modules should be accessible (e.g., https://github.com/nf-core/test-datasets).",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. It lacks the standard nf-core pipeline structure with modules/ directory and test configurations.",
+          "evidence": "The directory structure shows a Python package (nfcore_validator) with validator, scanner, and harvester components, but no modules/, tests/, or test data references typical of nf-core pipelines."
+        },
+        {
+          "id": "Category: Module Subcategory: Parameters Definitio",
+          "description": "Category: Module Subcategory: Parameters Definition: Any parameters that need to be evaluated in the context of a particular sample e.g. single-end/paired-end data must also be defined within the proc",
+          "meets_requirement": false,
+          "score": 0,
+          "reason": "This is not an nf-core pipeline but rather a validator tool for nf-core pipelines. It does not contain any Nextflow modules or processes to evaluate.",
+          "evidence": "The directory structure shows a Python package (nfcore_validator) with components for validation, scanning, and reporting, but no actual Nextflow workflow files, modules, or process definitions."
+        }
+      ]
+    }
+  ],
+  "overall_compliance_score": 0.0,
+  "total_components": 1,
+  "timestamp": "2025-07-04T16:39:08.097906"
+}

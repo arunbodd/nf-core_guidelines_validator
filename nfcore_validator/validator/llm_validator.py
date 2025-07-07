@@ -6,7 +6,7 @@ import json
 from typing import Dict, Any, List, Optional
 import re
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 import anthropic  # Direct Anthropic API client
 
@@ -88,6 +88,311 @@ Return your analysis in this exact JSON format:
 }
 
 Be thorough and check against ALL relevant nf-core requirements for the component type. Ensure your response is a valid JSON object."""
+
+    def _create_pipeline_vectorstore(self, pipeline_path: str) -> FAISS:
+        """Create a vectorstore from the pipeline codebase for efficient context retrieval"""
+        print(f"📚 Creating pipeline vectorstore from: {pipeline_path}")
+        
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+        from langchain.schema import Document
+        
+        documents = []
+        
+        # File extensions to include
+        code_extensions = {'.nf', '.py', '.yml', '.yaml', '.md', '.txt', '.config', '.json'}
+        
+        for root, dirs, files in os.walk(pipeline_path):
+            # Skip hidden directories and common non-code directories
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in {'__pycache__', 'node_modules'}]
+            
+            for file in files:
+                if any(file.endswith(ext) for ext in code_extensions):
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, pipeline_path)
+                    
+                    try:
+                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+                            
+                        if content.strip():  # Only add non-empty files
+                            # Create document with metadata
+                            doc = Document(
+                                page_content=f"File: {rel_path}\n\n{content}",
+                                metadata={
+                                    'file_path': rel_path,
+                                    'file_type': os.path.splitext(file)[1],
+                                    'source': 'pipeline_code'
+                                }
+                            )
+                            documents.append(doc)
+                            
+                    except Exception as e:
+                        print(f"⚠️ Error reading {rel_path}: {e}")
+                        continue
+        
+        print(f"📄 Found {len(documents)} code files")
+        
+        if not documents:
+            raise ValueError("No code files found in pipeline")
+        
+        # Split documents into chunks
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            separators=["\n\n", "\n", " ", ""]
+        )
+        
+        split_docs = text_splitter.split_documents(documents)
+        print(f"📝 Created {len(split_docs)} text chunks")
+        
+        # Create vectorstore
+        embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+        pipeline_vectorstore = FAISS.from_documents(split_docs, embeddings)
+        
+        print(f"✅ Pipeline vectorstore created with {len(split_docs)} chunks")
+        return pipeline_vectorstore
+    
+    def validate_pipeline_against_requirements(self, pipeline_path: str, pipeline_vectorstore_path: str = None) -> Dict[str, Any]:
+        """Validate entire pipeline against all requirements in vectorstore
+        
+        Args:
+            pipeline_path: Path to the pipeline directory
+            
+        Returns:
+            Dictionary with validation results for all requirements
+        """
+        print(f"🔍 Validating pipeline against all requirements: {pipeline_path}")
+        
+        # Get all requirements from vectorstore
+        try:
+            # Get ALL documents from vectorstore (not just similar ones)
+            try:
+                # Access the underlying FAISS vectorstore to get all documents
+                all_docs = []
+                if hasattr(self.vectorstore, 'docstore') and hasattr(self.vectorstore.docstore, '_dict'):
+                    # FAISS vectorstore - get all documents from docstore
+                    for doc_id, doc in self.vectorstore.docstore._dict.items():
+                        all_docs.append(doc)
+                else:
+                    # Fallback: use similarity search with very high k and broad query
+                    all_docs = self.vectorstore.similarity_search(
+                        "Category Definition",  # Broad query to match Excel format
+                        k=500  # Very high k to get all documents
+                    )
+            except Exception as e:
+                print(f"⚠️ Error accessing vectorstore documents directly, using similarity search: {e}")
+                all_docs = self.vectorstore.similarity_search(
+                    "Category Definition", 
+                    k=500
+                )
+            
+            print(f"📄 Retrieved {len(all_docs)} documents from vectorstore")
+            
+            # Extract requirements from documents (less restrictive filtering)
+            requirements = []
+            seen_requirements = set()
+            
+            for doc in all_docs:
+                content = doc.page_content.strip()
+                if not content:
+                    continue
+                    
+                # Create requirement ID from content (first 80 chars)
+                req_id = content[:80].strip().replace('\n', ' ')
+                
+                # Skip duplicates
+                if req_id in seen_requirements:
+                    continue
+                    
+                # Add requirement (less restrictive - include more content)
+                requirements.append({
+                    'id': req_id,
+                    'description': content[:300].strip().replace('\n', ' '),  # Longer description
+                    'full_content': content
+                })
+                seen_requirements.add(req_id)
+            
+            print(f"📋 Found {len(requirements)} requirements to validate")
+            
+        except Exception as e:
+            print(f"⚠️ Error retrieving requirements from vectorstore: {e}")
+            return {
+                'pipeline_path': pipeline_path,
+                'error': f'Failed to retrieve requirements: {str(e)}',
+                'results': []
+            }
+        
+        # Create or load pipeline vectorstore for efficient context retrieval
+        if pipeline_vectorstore_path and os.path.exists(pipeline_vectorstore_path):
+            print(f"📚 Loading existing pipeline vectorstore: {pipeline_vectorstore_path}")
+            try:
+                embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+                pipeline_vectorstore = FAISS.load_local(pipeline_vectorstore_path, embeddings, allow_dangerous_deserialization=True)
+                print(f"✅ Pipeline vectorstore loaded successfully")
+            except Exception as e:
+                print(f"⚠️ Error loading pipeline vectorstore, creating new one: {e}")
+                pipeline_vectorstore = self._create_pipeline_vectorstore(pipeline_path)
+        else:
+            print(f"🔄 Creating new pipeline vectorstore (consider using 'harvest-pipeline' command for reusability)")
+            pipeline_vectorstore = self._create_pipeline_vectorstore(pipeline_path)
+        
+        # Validate each requirement using targeted context
+        results = []
+        for i, req in enumerate(requirements[:120]):  # Limit to 120 as requested
+            print(f"⏳ Validating requirement {i+1}/{min(len(requirements), 120)}: {req['id'][:30]}...")
+            
+            # Get relevant pipeline context for this specific requirement
+            try:
+                relevant_docs = pipeline_vectorstore.similarity_search(
+                    req['full_content'],  # Use full requirement as query
+                    k=5  # Get top 5 most relevant code chunks
+                )
+                
+                # Combine relevant context
+                relevant_context = "\n\n".join([
+                    f"=== {doc.metadata.get('file_path', 'Unknown')} ===\n{doc.page_content}"
+                    for doc in relevant_docs
+                ])
+                
+                if not relevant_context.strip():
+                    relevant_context = "No relevant code found in pipeline."
+                    
+            except Exception as e:
+                print(f"⚠️ Error retrieving context for requirement {i+1}: {e}")
+                relevant_context = "Error retrieving pipeline context."
+            
+            # Ask LLM with targeted context
+            system_prompt = """You are an nf-core pipeline compliance expert. 
+            
+Analyze the provided relevant pipeline code and determine if it meets the given requirement.
+            
+Respond with ONLY a JSON object in this exact format:
+            {
+              "meets_requirement": true/false,
+              "reason": "Brief explanation of why it meets or doesn't meet the requirement",
+              "evidence": "Specific evidence from the pipeline code"
+            }"""
+            
+            user_prompt = f"""REQUIREMENT TO CHECK:
+{req['description']}
+
+FULL REQUIREMENT CONTEXT:
+{req['full_content']}
+
+RELEVANT PIPELINE CODE:
+{relevant_context[:3000]}  
+
+Does this pipeline meet the above requirement based on the relevant code? Respond with JSON only."""
+            
+            try:
+                response = self._query_anthropic(system_prompt, user_prompt)
+                
+                # Clean and extract JSON from response
+                cleaned_response = self._extract_json_from_response(response)
+                result_data = json.loads(cleaned_response)
+                
+                results.append({
+                    'id': req['id'],
+                    'description': req['description'],
+                    'meets_requirement': result_data.get('meets_requirement', False),
+                    'score': 1 if result_data.get('meets_requirement', False) else 0,
+                    'reason': result_data.get('reason', ''),
+                    'evidence': result_data.get('evidence', '')
+                })
+                
+            except Exception as e:
+                print(f"⚠️ Error validating requirement {i+1}: {e}")
+                # Fallback validation without JSON parsing
+                try:
+                    basic_response = self._query_anthropic(
+                        "You are an nf-core pipeline expert. Answer briefly: does this pipeline meet the requirement?",
+                        f"Requirement: {req['description'][:100]}\nRelevant Code: {relevant_context[:500]}"
+                    )
+                    meets_req = 'yes' in basic_response.lower() or 'meets' in basic_response.lower()
+                    reason = basic_response[:200] if basic_response else f'Validation error: {str(e)}'
+                except:
+                    meets_req = False
+                    reason = f'Validation error: {str(e)}'
+                
+                results.append({
+                    'id': req['id'],
+                    'description': req['description'],
+                    'meets_requirement': meets_req,
+                    'score': 1 if meets_req else 0,
+                    'reason': reason,
+                    'evidence': ''
+                })
+        
+        # Calculate compliance score
+        total_score = sum(r['score'] for r in results)
+        compliance_score = (total_score / len(results)) * 100 if results else 0
+        
+        return {
+            'pipeline_path': pipeline_path,
+            'total_requirements': len(results),
+            'requirements_met': total_score,
+            'compliance_score': compliance_score,
+            'results': results
+        }
+    
+    def _extract_json_from_response(self, response: str) -> str:
+        """Extract JSON from LLM response, handling various formats"""
+        if not response:
+            raise ValueError("Empty response")
+        
+        # Clean the response
+        response = response.strip()
+        
+        # Try to find JSON in the response
+        # Look for content between first { and last }
+        start_idx = response.find('{')
+        end_idx = response.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            json_str = response[start_idx:end_idx + 1]
+            # Basic validation - try to parse it
+            try:
+                json.loads(json_str)
+                return json_str
+            except:
+                pass
+        
+        # If no valid JSON found, try to construct one from the response
+        response_lower = response.lower()
+        meets_req = any(word in response_lower for word in ['yes', 'true', 'meets', 'complies', 'satisfies'])
+        
+        # Extract reason (first sentence or up to 200 chars)
+        reason = response[:200].strip()
+        if '.' in reason:
+            reason = reason.split('.')[0] + '.'
+        
+        # Construct JSON
+        constructed_json = {
+            "meets_requirement": meets_req,
+            "reason": reason,
+            "evidence": response[:300] if len(response) > 200 else ""
+        }
+        
+        return json.dumps(constructed_json)
+    
+    def _get_pipeline_structure(self, pipeline_path: str) -> str:
+        """Get a summary of the pipeline structure for validation"""
+        structure = []
+        structure.append(f"Pipeline Path: {pipeline_path}")
+        
+        # List key files and directories
+        if os.path.exists(pipeline_path):
+            for root, dirs, files in os.walk(pipeline_path):
+                # Limit depth to avoid too much detail
+                depth = root.replace(pipeline_path, '').count(os.sep)
+                if depth < 3:
+                    rel_path = os.path.relpath(root, pipeline_path)
+                    if rel_path != '.':
+                        structure.append(f"Directory: {rel_path}/")
+                    for file in files[:10]:  # Limit files per directory
+                        structure.append(f"File: {os.path.join(rel_path, file) if rel_path != '.' else file}")
+        
+        return '\n'.join(structure[:100])  # Limit total lines
 
     def validate_component(self, component_path: str) -> Dict[str, Any]:
         """Validate a single pipeline component

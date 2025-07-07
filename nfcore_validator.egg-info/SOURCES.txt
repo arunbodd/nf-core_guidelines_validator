@@ -13,6 +13,7 @@ nfcore_validator/chat/chat_interface.py
 nfcore_validator/cli/__init__.py
 nfcore_validator/cli/main.py
 nfcore_validator/harvester/__init__.py
+nfcore_validator/harvester/csv_harvester.py
 nfcore_validator/harvester/docs_harvester.py
 nfcore_validator/harvester/excel_harvester.py
 nfcore_validator/scanner/__init__.py
